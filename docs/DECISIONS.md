@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 6 tamamlandı (74 test).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 7 yazıldı (build/test bekleniyor).
 
 ---
 
@@ -138,6 +138,9 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K52 | Rekor, oyun bitince kaydedilir. Ayrıca oyun sürerken (oynanırken veya duraklatılmışken) pencere kapatılırsa da kaydedilir (Adım 4: b) |
 | K53 | Infrastructure paketleri: **Serilog 4.4.0**, **Serilog.Sinks.File 7.0.0** (`dotnet add package` ile Ali'nin makinesinde eklendi, csproj'dan okundu) |
 | K54 | SQLite paketi: **Microsoft.Data.Sqlite 11.0.0** (`dotnet add package` ile eklendi, csproj'dan okundu; net10.0-windows ile derlenip testleri geçti) |
+| K57 | Ses paketi: **NAudio.WinMM 3.3.0** (NAudio.Core 3.3.0 ve NAudio.Midi 3.3.0 ile birlikte gelir). NAudio 3 API: `ISampleProvider.Read(Span<float>)`, `WaveOut` (eski adı `WaveOutEvent`), `BufferMilliseconds` |
+| K55 | Ses tarzı **yumuşak, sinüs dalgası** (Adım 7 S1b) |
+| K56 | Ses seviyesi **%30** (Adım 7 S2a). Oyun içinde ayrı bir ses ayarı yok, M tuşu sesi tamamen kapatır |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -170,6 +173,10 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK23 | Bozuk veritabanı dosyası silinmez, `alibird.corrupt-yyyyMMddHHmmss.db` adıyla kenara alınır, yerine boş veritabanı oluşturulur. Kayıt sırasında bozukluk çıkarsa rekor yeni dosyaya bir kez daha yazılır, kaybolmaz | Ali onayladı |
 | CK24 | Bozukluk mesajını depo kendisi verir (`IHataBildirici`, EkranVeGunluk). Diğer hatalar presenter'a iletilir | Ali onayladı |
 | CK25 | Tarih `"o"` (ISO-8601, saat dilimiyle) metin olarak saklanır | Ali onayladı |
+| CK26 | Sesler: Zıplama 400→800 Hz, 80 ms. Puan 880 + 1320 Hz, 2×70 ms. Çarpma 120 Hz, sönümlenen, 150 ms. Oyun bitti: 150 ms sessizlik + 660→440→220 Hz, 3×150 ms. Her notanın başında ve sonunda 5 ms yumuşak geçiş (tık sesini önlemek için). 44100 Hz, mono | Ali'ye sunuldu, değiştirmedi |
+| CK27 | NAudio'nun yalnızca gereken kısmı eklenir: `NAudio.WinMM` paketi (`NAudio.Core`'u da beraberinde getirir). Tüm `NAudio` paketi eklenmez, kurulum boyutu küçük kalır (K16) | bildirildi |
+| CK28 | Dört ses açılışta bir kez üretilir ve bellekte tutulur. Karıştırıcı sürekli çalışır (`ReadFully`), böylece sesler üst üste binebilir | bildirildi |
+| CK29 | Ses cihazı yoksa ya da oyun sırasında çıkarılırsa `KullanilabilirMi` false olur, sağ altta "Ses yok" yazar, hata yalnızca loga gider. Oyun hiç durmaz (R6) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -213,8 +220,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | ✅ 31 test geçti, commit atıldı |
 | 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | ✅ testler geçti, commit atıldı |
 | 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici, SistemSaati, SistemRastgele + testler | ✅ 67 test geçti (Core 52 + Infrastructure 15), commit atıldı |
-| 6 | Infrastructure: SqlitePuanDeposu + testler | ✅ 74 test (Core 52 + Infrastructure 22), commit bekleniyor |
-| 7 | Infrastructure: SesUreteci, NAudioSesCalar | |
+| 6 | Infrastructure: SqlitePuanDeposu + testler | ✅ 74 test (Core 52 + Infrastructure 22), commit atıldı |
+| 7 | Infrastructure: SesUreteci, NAudioSesCalar + testler | ⏳ yazıldı, paket ekleme + build/test bekleniyor |
 | 8 | WinForms: çizim, ölçekleme, form, zamanlayıcı, bildirici, tek kopya, Program.cs DI | |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
@@ -241,3 +248,4 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - K numaralarını iki kez değiştirdi. Bundan sonra numaralar sabit, yeni karar sona eklenir.
 - `net10.0` yazdı, WinForms ve NAudio `net10.0-windows` gerektiriyordu.
 - Test sayısını tahminle söyledi (Adım 5'te 69, Adım 6'da 76 dedi; doğrusu 67 ve 74). Bundan sonra test sayısı dosyalardaki `[TestMethod]` sayılarak verilir.
+- NAudio kodunu kurulan sürümü kontrol etmeden, hafızadaki NAudio 2 API'siyle yazdı. Kurulan sürüm 3.3.0 çıktı ve build kırıldı. Bundan sonra yeni bir paket eklenince önce kurulan sürüm ve onun API'si kaynaktan kontrol edilir.
