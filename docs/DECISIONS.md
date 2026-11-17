@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 7 yazıldı (build/test bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 8a yazıldı (build bekleniyor).
 
 ---
 
@@ -141,6 +141,8 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K57 | Ses paketi: **NAudio.WinMM 3.3.0** (NAudio.Core 3.3.0 ve NAudio.Midi 3.3.0 ile birlikte gelir). NAudio 3 API: `ISampleProvider.Read(Span<float>)`, `WaveOut` (eski adı `WaveOutEvent`), `BufferMilliseconds` |
 | K55 | Ses tarzı **yumuşak, sinüs dalgası** (Adım 7 S1b) |
 | K56 | Ses seviyesi **%30** (Adım 7 S2a). Oyun içinde ayrı bir ses ayarı yok, M tuşu sesi tamamen kapatır |
+| K58 | Renk teması **Gece**: lacivert gökyüzü, gri-mor borular, açık sarı kuş, koyu gri zemin (Adım 8 G1b). Tüm renkler `Tema.Gece()` içinde |
+| K59 | Ekran metinleri Ali'nin onayladığı haliyle (Adım 8 G2): "AliBird" / "Başlamak için SPACE'e bas" / "Duraklatıldı" / "Devam etmek için P'ye bas" / "Oyun Bitti" / "Puan: N" / "Yeniden başlamak için SPACE" + [Yeniden Başlat] / "Rekor: N (gg.aa.yyyy)" / "YENİ REKOR!" / "SPACE: Zıpla   P: Duraklat   M: Ses" / "Ses yok" / "Ses kapalı (M)" |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -177,6 +179,15 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK27 | NAudio'nun yalnızca gereken kısmı eklenir: `NAudio.WinMM` paketi (`NAudio.Core`'u da beraberinde getirir). Tüm `NAudio` paketi eklenmez, kurulum boyutu küçük kalır (K16) | bildirildi |
 | CK28 | Dört ses açılışta bir kez üretilir ve bellekte tutulur. Karıştırıcı sürekli çalışır (`ReadFully`), böylece sesler üst üste binebilir | bildirildi |
 | CK29 | Ses cihazı yoksa ya da oyun sırasında çıkarılırsa `KullanilabilirMi` false olur, sağ altta "Ses yok" yazar, hata yalnızca loga gider. Oyun hiç durmaz (R6) | bildirildi |
+| CK30 | Adım 8 ikiye bölünür: 8a (çizim, form, tuşlar, zamanlayıcı, mesaj kutusu) ve 8b (Program.cs ile DI, tek kopya, genel hata yakalayıcılar). Şablondaki Form1 ve Program.cs 8b'de değiştirilir | Ali onayladı |
+| CK31 | Yazı tipi Segoe UI. Boyutlar piksel cinsinden, ölçekle birlikte büyür ve küçülür | Ali onayladı |
+| CK32 | "Yeniden Başlat" gerçek bir buton. Klavye odağını hiç almaz (`OdakAlmayanButon`), böylece Space butona basmaz ve 750 ms beklemesi atlanmaz | Ali onayladı |
+| CK33 | Çift tamponlama açık, `OnPaintBackground` boş (titreme yok) | Ali onayladı |
+| CK34 | Basılı tutulan tuş (Space, P, M) yalnızca bir kez sayılır. KeyDown'ın tekrarları yok sayılır, tuş KeyUp ile serbest kalır (G7) | bildirildi |
+| CK35 | Yeni rekorda rekor satırı güncel puanı gösterir ve yanında turuncu "YENİ REKOR!" yazar. Tarih, rekor kaydedildikten sonraki oyunda görünür | bildirildi |
+| CK36 | Form, Designer dosyası olmadan tamamen kodla kurulur. Her ayarın ne yaptığı yorumlarda açıklanır | bildirildi |
+| CK37 | Pencere başka bir pencerenin arkasına geçtiğinde (bir mesaj kutusu açılması dahil) ya da simge durumuna küçültüldüğünde oyun duraklar (K11) | bildirildi |
+| CK38 | Çizim hatası `OnPaint` içinde yakalanır. Mesaj kutusu çizim bittikten sonra (`BeginInvoke`) ve yalnızca bir kez açılır (M24 #7) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -221,8 +232,9 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | ✅ testler geçti, commit atıldı |
 | 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici, SistemSaati, SistemRastgele + testler | ✅ 67 test geçti (Core 52 + Infrastructure 15), commit atıldı |
 | 6 | Infrastructure: SqlitePuanDeposu + testler | ✅ 74 test (Core 52 + Infrastructure 22), commit atıldı |
-| 7 | Infrastructure: SesUreteci, NAudioSesCalar + testler | ⏳ yazıldı, paket ekleme + build/test bekleniyor |
-| 8 | WinForms: çizim, ölçekleme, form, zamanlayıcı, bildirici, tek kopya, Program.cs DI | |
+| 7 | Infrastructure: SesUreteci, NAudioSesCalar + testler | ✅ build/test geçti, commit atıldı (81 test metodu) |
+| 8a | WinForms: Tema, OyunCizici (GDI+), OlcekHesaplayici, AnaForm, OdakAlmayanButon, FormsZamanlayici, MesajKutusuBildirici | ⏳ yazıldı, build bekleniyor |
+| 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
