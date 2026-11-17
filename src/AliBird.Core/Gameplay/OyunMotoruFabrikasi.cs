@@ -6,6 +6,7 @@ namespace AliBird.Core.Gameplay;
 
 // IOyunMotoruFabrikasi'nin gercek uygulamasi.
 // Her oyuna ozel (durum tutan) parcalari burada "new" ile olusturur: Kus, EngelAlani, HizDenetcisi, PuanTablosu.
+// Motor bunlari arayuz olarak alir (K66); somut sinifi bilen TEK yer bu fabrikadir.
 // Neden "new" burada serbest? Fabrikanin tek isi zaten nesne uretmek (S); diger siniflar hicbir
 // yerde "new" kullanmadan parcalarini disaridan alir (R2). Durum tutmayan CarpismaDenetcisi ise
 // DI'dan tek bir ornek olarak gelir ve her oyunda paylasilir.

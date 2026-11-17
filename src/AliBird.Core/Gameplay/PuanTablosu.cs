@@ -1,3 +1,4 @@
+using AliBird.Core.Abstractions;
 using AliBird.Core.Models;
 
 namespace AliBird.Core.Gameplay;
@@ -5,7 +6,7 @@ namespace AliBird.Core.Gameplay;
 // Bu oyundaki puani ve onceki rekorla karsilastirmayi tutar (G4, K9, K10).
 // Tek sorumlulugu: sayi tutmak ve "rekor kirildi mi" sorusunu cevaplamak.
 // Veritabanina YAZMAZ; kaydetme isi Adim 4'te OyunYoneticisi + IPuanDeposu'nun (S, DIP).
-public sealed class PuanTablosu
+public sealed class PuanTablosu : IPuanTablosu
 {
     // Oyun basladiginda veritabanindan okunan rekor. Hic yoksa null (D3a).
     public RekorKaydi? OncekiRekor { get; }

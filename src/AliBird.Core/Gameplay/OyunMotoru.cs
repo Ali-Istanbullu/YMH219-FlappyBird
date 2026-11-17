@@ -9,21 +9,22 @@ namespace AliBird.Core.Gameplay;
 //
 // Tek sorumlulugu: bir kareyi isletmek, yani parcalari dogru sirayla calistirmak (S).
 // Kendisi fizik, carpisma ya da puan hesabi YAPMAZ; bunlari ilgili siniflara devreder.
-// Parcalarini kendisi "new"lemez; hepsi constructor'dan gelir (R2, DIP).
+// Parcalarini kendisi "new"lemez; hepsi constructor'dan ARAYUZ olarak gelir (R2, DIP, K66).
+// Boylece testte gercek fizik yerine sahte parcalar verilebilir.
 public sealed class OyunMotoru
 {
-    private readonly Kus _kus;
-    private readonly EngelAlani _engelAlani;
-    private readonly ICarpismaDenetcisi _carpismaDenetcisi;   // K65: arayuz uzerinden
-    private readonly HizDenetcisi _hizDenetcisi;
-    private readonly PuanTablosu _puanTablosu;
+    private readonly IKus _kus;
+    private readonly IEngelAlani _engelAlani;
+    private readonly ICarpismaDenetcisi _carpismaDenetcisi;
+    private readonly IHizDenetcisi _hizDenetcisi;
+    private readonly IPuanTablosu _puanTablosu;
 
     public OyunMotoru(
-        Kus kus,
-        EngelAlani engelAlani,
+        IKus kus,
+        IEngelAlani engelAlani,
         ICarpismaDenetcisi carpismaDenetcisi,
-        HizDenetcisi hizDenetcisi,
-        PuanTablosu puanTablosu)
+        IHizDenetcisi hizDenetcisi,
+        IPuanTablosu puanTablosu)
     {
         // Eksik parca varsa motor calisamaz: hemen ve acik bir hata ver.
         ArgumentNullException.ThrowIfNull(kus);

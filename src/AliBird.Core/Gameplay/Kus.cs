@@ -1,4 +1,5 @@
 using System.Drawing;
+using AliBird.Core.Abstractions;
 using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
@@ -6,7 +7,7 @@ namespace AliBird.Core.Gameplay;
 // Oyuncunun kontrol ettigi kus (G1).
 // Tek sorumlulugu: kendi dikey hareketini (ziplama + yer cekimi) hesaplamak.
 // Carpip carpmadigina BAKMAZ; o is CarpismaDenetcisi'nin (S).
-public sealed class Kus
+public sealed class Kus : IKus
 {
     // Tum sayisal degerler buradan okunur; sinifin icinde sabit sayi yok (D1b).
     private readonly OyunAyarlari _ayarlar;

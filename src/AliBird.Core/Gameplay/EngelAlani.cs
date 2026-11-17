@@ -5,7 +5,7 @@ namespace AliBird.Core.Gameplay;
 
 // Ekrandaki engellerin hepsini yonetir (G2).
 // Tek sorumlulugu: engelleri kaydirmak, ekrandan cikani saga tasimak, gecilenleri saymak (S).
-public sealed class EngelAlani
+public sealed class EngelAlani : IEngelAlani
 {
     private readonly OyunAyarlari _ayarlar;
 

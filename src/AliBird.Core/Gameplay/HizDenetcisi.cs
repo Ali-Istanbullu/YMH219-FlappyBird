@@ -1,3 +1,4 @@
+using AliBird.Core.Abstractions;
 using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
@@ -6,7 +7,7 @@ namespace AliBird.Core.Gameplay;
 // Chrome Dino ile ayni kural: hiz 6'dan baslar, her karede 0.001 artar, 13'te durur.
 // Artis skora degil KAREYE baglidir.
 // Tek sorumlulugu: guncel hizi bilmek ve artirmak (S).
-public sealed class HizDenetcisi
+public sealed class HizDenetcisi : IHizDenetcisi
 {
     private readonly OyunAyarlari _ayarlar;
 

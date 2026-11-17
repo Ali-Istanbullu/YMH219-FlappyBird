@@ -149,6 +149,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K63 | Loglama kapsamı (b): **hatalar ve önemli olaylar**. Önemli olaylar: uygulamanın açılması ve kapanması (sürüm), rekorun okunması, yeni rekorun kaydedilmesi (puan ve tarih), ses cihazının durumu, veritabanının ve klasörün yeniden oluşturulması (M24 #3), her oyunun bitişi (puan). Zıplama ve engel geçme gibi her kare olayı loglanmaz. 8c'de yapılır |
 | K64 | DI paketi: **Microsoft.Extensions.DependencyInjection 11.0.0** (csproj'dan okundu) |
 | K65 | 8c taramasından sonra (a): `EngelAlani` içindeki `new Engel` ve `NAudioSesCalar` içindeki `new DiziSesSaglayici` üretici arayüzlerine taşınır (`IEngelUretici`, `ISesSaglayiciUretici`). `IOyunCizici`, `IOlcekHesaplayici`, `ICarpismaDenetcisi` arayüzleri eklenir. `OyunCizici` `SahneCizici`, `BilgiCizici` ve `DurumKatmaniCizici` olarak bölünür. Ayrı bir commit olarak yapılır (8d) |
+| K66 | CK51 için (b): `OyunMotoru` tüm parçalarını arayüz olarak alır (`IKus`, `IEngelAlani`, `IHizDenetcisi`, `IPuanTablosu`). Somut sınıfları bilen tek yer fabrika. Motor sahte parçalarla da test edilir (`OyunMotoruSiraTestleri`). 8d commit'ine dahil |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -206,7 +207,8 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK48 | `EkranYerlesimi` statik sabitler sınıfı: butonun sanal alandaki yeri tek bir yerde tanımlı, hem çizici hem form kullanıyor. Sabit değer olduğu için bağımlılık sayılmaz | bildirildi |
 | CK49 | `CizimKaynaklari` GDI+ kaynak paketi (fırça, kalem, yazı tipi). Katman çizicilerine `Tema` ve `OyunAyarlari` gibi bir ayar nesnesi olarak constructor'dan verilir (somut sınıf, arayüzsüz) | bildirildi |
 | CK50 | Çizim katmanları `IKatmanCizici` olarak DI'a kaydedilir. **Kayıt sırası çizim sırasıdır** (sahne → bilgi → durum). Yeni bir katman eklemek için mevcut kod değişmez, yeni bir sınıf yazılıp kaydedilir (O) | bildirildi |
-| CK51 | **Açık nokta:** `OyunMotoru` `Kus`, `EngelAlani`, `HizDenetcisi` ve `PuanTablosu`'nu somut sınıf olarak alıyor. Bunlar servis değil, her oyuna ait varlık nesneleri ve fabrika üretiyor. İsterse Ali'ye arayüzleri eklenir | Ali'ye soruldu |
+| CK51 | `OyunMotoru`'nun somut varlık nesneleri (`Kus`, `EngelAlani`, `HizDenetcisi`, `PuanTablosu`) Ali'ye soruldu → K66 (b) | Ali karar verdi |
+| CK52 | K66 arayüzlerinde sadece motorun kullandığı üyeler var (I). Örn. `IKus`'ta `Y`/`DikeyHiz` yok; bunları sadece `KusTestleri` somut sınıf üzerinden kullanıyor. `IOyunMotoruFabrikasi.Olustur` somut `OyunMotoru` döndürmeye devam ediyor (presenter motorun tamamını kullanıyor, tek uygulaması var) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -255,7 +257,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8a | WinForms: Tema, OyunCizici (GDI+), OlcekHesaplayici, AnaForm, OdakAlmayanButon, FormsZamanlayici, MesajKutusuBildirici | ✅ build geçti, commit atıldı |
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
 | 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
-| 8d | K65: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi | ⏳ yazıldı, build/test bekleniyor |
+| 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ⏳ yazıldı, build/test bekleniyor |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
