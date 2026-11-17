@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 4 yazıldı (build/test bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 5 yazıldı (build/test bekleniyor).
 
 ---
 
@@ -136,6 +136,9 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K51 | Zemin çarpışmasında da 3 px küçültülmüş kutu kullanılır (kuş görselde zemine 3 px girer, sonra oyun biter) |
 | R5 | **(17.11.2026'dan itibaren)** Uygulama içindeki mantıksal ve teknik ayrıntılara Claude karar verir, her birini deftere "Claude kararı" (CK) olarak yazar ve Ali'ye bildirir. Ali'ye yalnızca **önemli** sorular sorulur: kullanıcının gördüğü davranışı, veri kaybını, Ali'nin kurallarını (R1–R4, K14–K18), mimariyi veya yeni paket/bağımlılığı etkileyenler. Ali her CK'yi geri çevirebilir |
 | K52 | Rekor, oyun bitince kaydedilir. Ayrıca oyun sürerken (oynanırken veya duraklatılmışken) pencere kapatılırsa da kaydedilir (Adım 4: b) |
+| K53 | Infrastructure paketleri: **Serilog 4.4.0**, **Serilog.Sinks.File 7.0.0** (`dotnet add package` ile Ali'nin makinesinde eklendi, csproj'dan okundu) |
+| R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
+| R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
 
 ### Claude kararları (CK, R5 gereği; Ali her birini geri çevirebilir)
@@ -154,6 +157,14 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK11 | Tuş işlemlerindeki hatalar yalnızca loga yazılır. Ses çalma hatası da yalnızca loga yazılır, kullanıcı bunu "Ses yok" göstergesinden görür | bildirildi |
 | CK12 | Rekor kaydı başarısız olsa bile o oturum boyunca yeni rekor geçerli sayılır | bildirildi |
 | CK13 | `IOyunMotoruFabrikasi` somut `OyunMotoru` döndürür (ayrı bir `IOyunMotoru` arayüzü yok). Testler gerçek motoru `SahteRastgele` ile kullanır | bildirildi |
+| CK14 | Infrastructure testlerinin her biri kendi geçici klasörünü kullanır (`GeciciKlasor`). Paralel çalıştırma açık kalır | Ali onayladı |
+| CK15 | Log satırı biçimi: `yyyy-MM-dd HH:mm:ss.fff zzz [ERR] mesaj` ve altında hata ayrıntısı | Ali onayladı |
+| CK16 | Bilgi ve üstü seviyeler loglanır | Ali onayladı |
+| CK17 | Kapanışta logger `Dispose` edilir, bekleyen satırlar diske yazılır | Ali onayladı |
+| CK18 | Kullanıcı mesajı boşsa "Beklenmeyen bir hata oluştu." gösterilir. Mesaj kutusu hatası loga yazılır, uygulama çökmez | Ali onayladı |
+| CK19 | Log yazılamazsa uygulama sessizce devam eder. Log klasörü oluşturulamazsa hiçbir yere yazmayan boş bir logger kullanılır. Testle doğrulanır | Ali onayladı |
+| CK20 | `IUygulamaYollari` arayüzü Infrastructure'da durur (Core bilmez). Testlerde gerçek AppData yerine geçici klasör verilir | bildirildi |
+| CK21 | Infrastructure klasörleri: `FileSystem/`, `Logging/`, `Errors/`, `Platform/`. "System" adı .NET'in `System` namespace'iyle çakıştığı için kullanılmadı | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -195,8 +206,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 1 | İskelet: solution, projeler, referanslar, global.json, .gitignore | ✅ build ve 2/2 test geçti, csproj/global.json/.slnx/.gitignore Claude tarafından doğrulandı, commit atıldı |
 | 2 | Core: arayüzler ve veri tipleri | ✅ build başarılı, commit atıldı. `IOyunMotoruFabrikasi` Adım 4'e kaldı (OyunMotoru o adımda yazılacak) |
 | 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | ✅ 31 test geçti, commit atıldı |
-| 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | ⏳ yazıldı, build/test bekleniyor |
-| 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici + testler | |
+| 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | ✅ testler geçti, commit atıldı |
+| 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici, SistemSaati, SistemRastgele + testler | ⏳ yazıldı, paket ekleme + build/test bekleniyor |
 | 6 | Infrastructure: SqlitePuanDeposu + testler | |
 | 7 | Infrastructure: SesUreteci, NAudioSesCalar | |
 | 8 | WinForms: çizim, ölçekleme, form, zamanlayıcı, bildirici, tek kopya, Program.cs DI | |
@@ -213,6 +224,7 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - Ses karakteri: her sesin tonu, süresi, seviyesi (Adım 7)
 - Görünüm: renkler, yazı tipi ve boyutu, Game Over metinleri (Adım 8)
 - Timer aralığı ve fizik/hız değerleri, ölçüme dayanarak (Adım 9)
+- **UNUTMA (Ali istedi):** Oyun açıkken `logs` klasörü silinirse ne olduğu elle denenecek (K16, Adım 9)
 - Runtime dışında bir ön koşul gerekip gerekmediği, temiz bilgisayarda test edilerek (Adım 11)
 - Kod Sözlüğü'nün içeriği (Adım 12)
 
