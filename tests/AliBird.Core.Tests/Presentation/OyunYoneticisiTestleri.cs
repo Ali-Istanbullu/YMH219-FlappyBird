@@ -2,12 +2,15 @@ using AliBird.Core.Configuration;
 using AliBird.Core.Gameplay;
 using AliBird.Core.Models;
 using AliBird.Core.Presentation;
+using AliBird.Core.Services;
 using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Presentation;
 
 // Presenter'in durum gecislerini, ses, rekor ve hata davranisini dogrular
-// (K11, K13, K14, K52, CK1-CK7, M24).
+// (K11, K13, K14, K52, K63, CK1-CK7, M24).
+// Adim 8c'den sonra presenter'a GERCEK RekorYoneticisi/SesYoneticisi/KareHataSayaci verilir;
+// bunlarin altindaki dis dunya (depo, ses calar, log) sahte siniflardir.
 [TestClass]
 public sealed class OyunYoneticisiTestleri
 {
@@ -17,6 +20,7 @@ public sealed class OyunYoneticisiTestleri
     private SahteZamanlayici _zamanlayici = null!;
     private SahteHataBildirici _hata = null!;
     private SahteSaat _saat = null!;
+    private SahteGunlukcu _gunlukcu = null!;
 
     // Her testten once temiz sahte nesneler.
     [TestInitialize]
@@ -28,13 +32,24 @@ public sealed class OyunYoneticisiTestleri
         _zamanlayici = new SahteZamanlayici();
         _hata = new SahteHataBildirici();
         _saat = new SahteSaat();
+        _gunlukcu = new SahteGunlukcu();
     }
 
     private async Task<OyunYoneticisi> BaslatilmisYonetici(OyunAyarlari? ayarlar = null)
     {
         ayarlar ??= new OyunAyarlari();
         var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar));
-        var yonetici = new OyunYoneticisi(_gorunum, fabrika, _depo, _ses, _zamanlayici, _hata, _saat, ayarlar);
+        var yonetici = new OyunYoneticisi(
+            _gorunum,
+            fabrika,
+            new RekorYoneticisi(_depo, _hata, _gunlukcu, _saat),
+            new SesYoneticisi(_ses, _hata),
+            new KareHataSayaci(_hata, ayarlar),
+            _zamanlayici,
+            _hata,
+            _gunlukcu,
+            _saat,
+            ayarlar);
         await yonetici.BaslatAsync();
         return yonetici;
     }
@@ -262,5 +277,27 @@ public sealed class OyunYoneticisiTestleri
         Assert.AreEqual(OyunDurumu.OyunBitti, yonetici.Durum);   // CK3
         Assert.AreEqual(1, _hata.EkranaGidenSayisi);              // M24 #7: tekrar tekrar gosterilmez
         Assert.HasCount(3, _hata.Bildirimler);                   // log da her karede dolmaz
+    }
+
+    [TestMethod]
+    public async Task OyunBitince_PuanLogaYazilir()
+    {
+        var yonetici = await BaslatilmisYonetici();
+        _gorunum.BoslugaBas();
+
+        OyunBitenekadarIlerlet(yonetici);
+
+        CollectionAssert.Contains(_gunlukcu.Bilgiler, "Oyun bitti. Puan: 0");   // K63
+    }
+
+    [TestMethod]
+    public async Task YeniRekorKaydedilince_LogaYazilir()
+    {
+        var yonetici = await BaslatilmisYonetici(new OyunAyarlari { IlkEngelX = -50f });
+        _gorunum.BoslugaBas();
+
+        OyunBitenekadarIlerlet(yonetici);
+
+        Assert.IsTrue(_gunlukcu.Bilgiler.Any(b => b.StartsWith("Yeni rekor kaydedildi: 1")));   // K63
     }
 }

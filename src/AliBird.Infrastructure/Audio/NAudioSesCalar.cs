@@ -31,10 +31,11 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
     // volatile: ses kartinin kendi is parcacigi (thread) da bu degeri degistirebilir.
     private volatile bool _kullanilabilir;
 
-    public NAudioSesCalar(ISesUreteci uretici, IHataBildirici hataBildirici)
+    public NAudioSesCalar(ISesUreteci uretici, IHataBildirici hataBildirici, IGunlukcu gunlukcu)
     {
         ArgumentNullException.ThrowIfNull(uretici);
         ArgumentNullException.ThrowIfNull(hataBildirici);
+        ArgumentNullException.ThrowIfNull(gunlukcu);
         _hataBildirici = hataBildirici;
 
         // 32 bit ondalikli, tek kanal, 44100 Hz ses bicimi.
@@ -60,6 +61,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             _cikis.Play();
 
             _kullanilabilir = true;
+            gunlukcu.Bilgi("Ses cihazı hazır.");   // K63: ses cihazinin durumu
         }
         catch (Exception hata)
         {
@@ -68,6 +70,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             CikisiKapat(_cikis);
             _cikis = null;
             _hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
+            gunlukcu.Uyari("Ses cihazı açılamadı, oyun sessiz devam ediyor.");   // K63
         }
     }
 

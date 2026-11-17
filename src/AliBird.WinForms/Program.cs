@@ -3,6 +3,7 @@ using AliBird.Core.Configuration;
 using AliBird.Core.Gameplay;
 using AliBird.Core.Models;
 using AliBird.Core.Presentation;
+using AliBird.Core.Services;
 using AliBird.Infrastructure.Audio;
 using AliBird.Infrastructure.Errors;
 using AliBird.Infrastructure.FileSystem;
@@ -19,14 +20,12 @@ namespace AliBird.WinForms;
 // ================================================================================
 //  UYGULAMANIN BASLANGIC NOKTASI ve "KOMPOZISYON KOKU" (Composition Root)
 //
-//  Projedeki TEK yer burasi ki siniflar birbirine baglanir (M6a, K19, R2):
-//  DI container (Microsoft.Extensions.DependencyInjection) sadece burada kurulur.
+//  Tek sorumlulugu (K61): uygulamayi ayaga kaldirmak.
+//   1) Genel hata yakalayiciyi devreye almak (isi GenelHataYakalayici'da)
+//   2) Tek kopya kontrolu (isi TekKopyaKoruyucu'da)
+//   3) Siniflari birbirine baglamak: DI container SADECE burada kurulur (M6a, R2)
+//   4) Pencereyi acmak, kapanista rekoru kaydettirmek, acilis/kapanisi loglamak (K52, K63)
 //  Diger hicbir sinif container'i bilmez; hepsi ihtiyaclarini constructor'dan alir.
-//
-//  Ayrica burada:
-//   - Tek kopya kontrolu (K17)
-//   - Genel hata yakalayicilar: gozden kacan bir hata bile uygulamayi COKERTMESIN (R6)
-//   - Pencere kapanirken rekorun kaydedilmesi (K52 b)
 // ================================================================================
 internal static class Program
 {
@@ -34,22 +33,17 @@ internal static class Program
     private const string TekKopyaKilidi = @"Local\AliBird_TekKopya";
     private const string Baslik = "AliBird";
 
-    // Genel hata yakalayicilarin kullandigi bildirici. DI kurulana kadar null'dir.
-    private static IHataBildirici? _hataBildirici;
-
-    // CK40: Genel yakalayicinin mesaj kutusu en fazla bir kez acilir; sonrakiler sadece loga gider.
-    private static bool _genelHataGosterildi;
-
     [STAThread]
     private static void Main()
     {
-        // 1) Genel hata yakalayicilar: HER SEYDEN ONCE kurulur (R6, M24 #8).
-        GenelHataYakalayicilariniKur();
+        // 1) Genel hata yakalayici: HER SEYDEN ONCE (R6). DI'dan once gerektigi icin burada olusturulur.
+        var genelHataYakalayici = new GenelHataYakalayici();
+        genelHataYakalayici.Kur();
 
-        // 2) WinForms'un standart ayarlari (yuksek DPI, gorsel stiller). Sablondan gelir.
+        // 2) WinForms'un standart ayarlari (yuksek DPI, gorsel stiller).
         ApplicationConfiguration.Initialize();
 
-        // 3) Tek kopya (K17, M25b): oyun zaten aciksa haber ver ve kapan.
+        // 3) Tek kopya (K17, M25b).
         using var tekKopya = new TekKopyaKoruyucu(TekKopyaKilidi);
         if (!tekKopya.IlkKopyaMi)
         {
@@ -57,12 +51,12 @@ internal static class Program
             return;
         }
 
-        // 4) Siniflari birbirine bagla. Burada hata olursa oyun acilamaz (M24 #9).
+        // 4) Siniflari bagla. Hata olursa oyun acilamaz (M24 #9).
         ServiceProvider servisler;
         try
         {
             servisler = ServisleriKur();
-            _hataBildirici = servisler.GetRequiredService<IHataBildirici>();
+            genelHataYakalayici.BildiriciyiAta(servisler.GetRequiredService<IHataBildirici>());
         }
         catch (Exception hata)
         {
@@ -73,12 +67,14 @@ internal static class Program
         // 5) Oyunu calistir. "using": cikista butun servisler (log, ses, veritabani...) duzgun kapanir.
         using (servisler)
         {
+            IGunlukcu gunlukcu = servisler.GetRequiredService<IGunlukcu>();
             try
             {
+                gunlukcu.Bilgi($"AliBird {Application.ProductVersion} açıldı.");   // K63
+
                 AnaForm form = servisler.GetRequiredService<AnaForm>();
                 OyunYoneticisi yonetici = servisler.GetRequiredService<OyunYoneticisi>();
-
-                PencereOlaylariniBagla(form, yonetici);
+                PencereOlaylariniBagla(form, yonetici, servisler.GetRequiredService<IHataBildirici>());
 
                 // Pencere kapanana kadar burada kalir.
                 Application.Run(form);
@@ -86,6 +82,10 @@ internal static class Program
             catch (Exception hata)
             {
                 BaslangicHatasiniBildir(hata);
+            }
+            finally
+            {
+                gunlukcu.Bilgi("AliBird kapandı.");   // K63 (logger servislerle birlikte en son kapanir)
             }
         }
     }
@@ -95,16 +95,22 @@ internal static class Program
     {
         var servisler = new ServiceCollection();
 
-        // ---- Core ----
+        // ---- Core: oyun ----
         servisler.AddSingleton(new OyunAyarlari());                                // D1b
-        servisler.AddSingleton<CarpismaDenetcisi>();                               // durum tutmaz, paylasilir (CK8)
-        servisler.AddSingleton<IOyunMotoruFabrikasi, OyunMotoruFabrikasi>();       // her oyunda yeni motor (K19)
+        servisler.AddSingleton<CarpismaDenetcisi>();                               // durum tutmaz (CK8)
+        servisler.AddSingleton<IOyunMotoruFabrikasi, OyunMotoruFabrikasi>();       // her oyunda yeni motor (K19, K60)
+
+        // ---- Core: servisler (K61, Adim 8c) ----
+        servisler.AddSingleton<IRekorYoneticisi, RekorYoneticisi>();
+        servisler.AddSingleton<ISesYoneticisi, SesYoneticisi>();
+        servisler.AddSingleton<IKareHataSayaci, KareHataSayaci>();
         servisler.AddSingleton<OyunYoneticisi>();                                  // presenter
 
         // ---- Infrastructure ----
         servisler.AddSingleton<IUygulamaYollari>(_ => new UygulamaYollari(UygulamaYollari.VarsayilanKokKlasor()));
         servisler.AddSingleton<IGunlukcu, SerilogGunlukcu>();                      // K15
         servisler.AddSingleton<IHataBildirici, HataBildirici>();                   // K14
+        servisler.AddSingleton<IBozukVeritabaniKurtarici, BozukVeritabaniKurtarici>();   // K61
         servisler.AddSingleton<IPuanDeposu, SqlitePuanDeposu>();                   // K10
         servisler.AddSingleton<ISesUreteci, SesUreteci>();                         // K13
         servisler.AddSingleton<ISesCalar, NAudioSesCalar>();
@@ -130,7 +136,7 @@ internal static class Program
     }
 
     // ================= PENCERE OLAYLARI =================
-    private static void PencereOlaylariniBagla(AnaForm form, OyunYoneticisi yonetici)
+    private static void PencereOlaylariniBagla(AnaForm form, OyunYoneticisi yonetici, IHataBildirici hataBildirici)
     {
         // Pencere ekranda gorununce oyunu baslat (rekoru oku, zamanlayiciyi calistir).
         form.Shown += async (_, _) =>
@@ -141,13 +147,11 @@ internal static class Program
             }
             catch (Exception hata)
             {
-                _hataBildirici?.Bildir(hata, Gorunurluk.EkranVeGunluk, "Oyun başlatılamadı.");
+                hataBildirici.Bildir(hata, Gorunurluk.EkranVeGunluk, "Oyun başlatılamadı.");
             }
         };
 
-        // K52 b: pencere kapanirken oyun suruyorsa rekor kaydedilsin.
-        // Kayit async oldugu icin ilk kapanma istegini iptal edip kaydi bekleriz (en fazla 2 sn, CK6),
-        // sonra pencereyi tekrar kapatiriz.
+        // K52 b: kapanirken ilk istegi iptal et, rekor kaydini bekle (en fazla 2 sn, CK6), sonra kapat (CK39).
         bool kapanisaHazir = false;
         form.FormClosing += async (_, e) =>
         {
@@ -163,56 +167,12 @@ internal static class Program
             }
             catch (Exception hata)
             {
-                _hataBildirici?.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
+                hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
             }
 
             kapanisaHazir = true;
             form.Close();
         };
-    }
-
-    // ================= GENEL HATA YAKALAYICILAR (R6) =================
-    private static void GenelHataYakalayicilariniKur()
-    {
-        // Arayuz is parcacigindaki yakalanmamis hatalar Application.ThreadException'a gelsin;
-        // boylece uygulama kapanmaz, kullanici bilgilendirilir ve oyun devam eder.
-        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-        Application.ThreadException += (_, e) => GenelHatayiBildir(e.Exception);
-
-        // Arka plan is parcaciklarindaki hatalar. .NET bu durumda uygulamayi kapatir;
-        // biz en azindan loga yazariz (bkz. CK41).
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            GenelHatayiBildir(e.ExceptionObject as Exception ?? new Exception("Bilinmeyen hata"));
-
-        // Beklenmeyen (await edilmemis) Task hatalari: loga yaz ve "goruldu" isaretle ki surec kapanmasin.
-        TaskScheduler.UnobservedTaskException += (_, e) =>
-        {
-            GenelHatayiBildir(e.Exception);
-            e.SetObserved();
-        };
-    }
-
-    private static void GenelHatayiBildir(Exception hata)
-    {
-        try
-        {
-            if (_hataBildirici is null)
-            {
-                // DI henuz kurulmadi: dogrudan mesaj kutusu.
-                MessageBox.Show("Beklenmeyen bir hata oluştu.", Baslik, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // CK40: ilk genel hata ekranda gosterilir, sonrakiler sadece loga gider (mesaj kutusu yagmuru olmasin).
-            Gorunurluk gorunurluk = _genelHataGosterildi ? Gorunurluk.SadeceGunluk : Gorunurluk.EkranVeGunluk;
-            _genelHataGosterildi = true;
-            _hataBildirici.Bildir(hata, gorunurluk,
-                "Beklenmeyen bir hata oluştu. Oyun çalışmaya devam ediyor; sorun sürerse oyunu yeniden başlatın.");
-        }
-        catch
-        {
-            // R6: son savunma hattinda da exception disari cikmaz.
-        }
     }
 
     // M24 #9: oyun hic acilamadi. Kullaniciya soyle ve mumkunse loga yaz.

@@ -6,13 +6,15 @@ using AliBird.Infrastructure.Tests.Fakes;
 namespace AliBird.Infrastructure.Tests.Persistence;
 
 // Gercek bir SQLite dosyasi ile (gecici klasorde) rekor okuma/yazma ve hata kurallarini dogrular
-// (K10, K16, M24 #3 #4, CK22, CK23, CK25).
+// (K10, K16, K63, M24 #3 #4, CK22, CK23, CK25).
+// Adim 8c: depoya GERCEK BozukVeritabaniKurtarici verilir; log ve hata bildirimi sahtedir.
 [TestClass]
 public sealed class SqlitePuanDeposuTestleri
 {
     private GeciciKlasor _kok = null!;
     private UygulamaYollari _yollar = null!;
     private SahteHataBildirici _hata = null!;
+    private SahteGunlukcu _gunlukcu = null!;
     private SqlitePuanDeposu _depo = null!;
 
     [TestInitialize]
@@ -21,7 +23,9 @@ public sealed class SqlitePuanDeposuTestleri
         _kok = new GeciciKlasor();
         _yollar = new UygulamaYollari(_kok.Yol);
         _hata = new SahteHataBildirici();
-        _depo = new SqlitePuanDeposu(_yollar, _hata, new SahteSaat());
+        _gunlukcu = new SahteGunlukcu();
+        var kurtarici = new BozukVeritabaniKurtarici(_yollar, _hata, _gunlukcu, new SahteSaat());
+        _depo = new SqlitePuanDeposu(_yollar, kurtarici, _gunlukcu);
     }
 
     [TestCleanup]
@@ -32,6 +36,7 @@ public sealed class SqlitePuanDeposuTestleri
     {
         Assert.IsNull(await _depo.RekoruOkuAsync());   // D3a
         Assert.IsTrue(File.Exists(_yollar.VeritabaniDosyasi()));   // dosya olusturuldu
+        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));   // M24 #3, K63
     }
 
     [TestMethod]
@@ -67,6 +72,7 @@ public sealed class SqlitePuanDeposuTestleri
         await _depo.RekoruKaydetAsync(new RekorKaydi(3, DateTime.Now));
         Assert.AreEqual(3, (await _depo.RekoruOkuAsync())!.Puan);
         Assert.IsEmpty(_hata.Bildirimler);                           // kullaniciya bir sey gosterilmedi
+        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));   // ama loga yazildi (M24 #3)
     }
 
     [TestMethod]

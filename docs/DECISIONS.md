@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 8b yazıldı (ilk çalıştırma bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 8c yazıldı (build/test bekleniyor).
 
 ---
 
@@ -148,6 +148,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K62 | Kütüphane nesneleri: Ali'nin kuralı "SOLID'e uymuyorsa ayrılsın". Değerlendirme: Serilog, SQLite bağlantısı, NAudio WaveOut, Mutex, Timer ve GDI+ nesneleri, tek görevi o kütüphaneyi sarmak olan "adaptör" sınıflarının içinde oluşturuluyor. Core bu sınıfları değil, arayüzleri biliyor. Bu S ve D'ye uygun, o yüzden yerinde kalır. 8c sırasında bir adaptörün kütüphaneyi sarmanın yanında başka bir iş de yaptığı görülürse o iş ayrılır |
 | K63 | Loglama kapsamı (b): **hatalar ve önemli olaylar**. Önemli olaylar: uygulamanın açılması ve kapanması (sürüm), rekorun okunması, yeni rekorun kaydedilmesi (puan ve tarih), ses cihazının durumu, veritabanının ve klasörün yeniden oluşturulması (M24 #3), her oyunun bitişi (puan). Zıplama ve engel geçme gibi her kare olayı loglanmaz. 8c'de yapılır |
 | K64 | DI paketi: **Microsoft.Extensions.DependencyInjection 11.0.0** (csproj'dan okundu) |
+| K65 | 8c taramasından sonra (a): `EngelAlani` içindeki `new Engel` ve `NAudioSesCalar` içindeki `new DiziSesSaglayici` üretici arayüzlerine taşınır (`IEngelUretici`, `ISesSaglayiciUretici`). `IOyunCizici`, `IOlcekHesaplayici`, `ICarpismaDenetcisi` arayüzleri eklenir. `OyunCizici` `SahneCizici`, `BilgiCizici` ve `DurumKatmaniCizici` olarak bölünür. Ayrı bir commit olarak yapılır (8d) |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -198,6 +199,10 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK41 | **Sınırlama:** Arka plan iş parçacığında yakalanmamış bir hata olursa .NET uygulamayı her durumda kapatır. Buna karşı yapılabilecek tek şey hatayı loga yazmak. Bizim kodumuzda arka plan iş parçacığı yok. NAudio'nun kendi iş parçacığındaki hatalar `PlaybackStopped` ile yakalanıyor (CK29) | bildirildi |
 | CK42 | Tek kopya kilidi (Mutex) oluşturulamazsa oyun açılır, engellenmez (R6) | bildirildi |
 | CK43 | Şablondan gelen Form1.cs ve Form1.Designer.cs silinir, yerine AnaForm kullanılır. DI kayıtları `ValidateOnBuild` ile oyun açılırken doğrulanır | bildirildi |
+| CK44 | 8c bölmesi: `RekorYoneticisi`, `SesYoneticisi`, `KareHataSayaci` Core'da `Services/` klasöründe, her birinin bir arayüzü var. `OyunYoneticisi` artık yalnızca koordinasyon yapıyor (tuş → durum, kare akışı, görüntüyü sunma) | bildirildi |
+| CK45 | `GenelHataYakalayici` DI'dan gelmez, çünkü DI kurulmadan önce devreye girmesi gerekir. `Program.cs` onu ilk iş olarak oluşturur, hata bildiricisini DI kurulduktan sonra `BildiriciyiAta` ile verir (method injection) | bildirildi |
+| CK46 | M24 #3: veritabanı dosyası yoksa (ilk açılış ya da kullanıcı silmiş) yeniden oluşturulur ve bu Bilgi olarak loglanır. Klasör silindiyse de dosya olmayacağı için aynı log yazılır | bildirildi |
+| CK47 | Sürüm `1.0.0`, WinForms csproj'da `<Version>` ile tanımlanır. Açılış logu `Application.ProductVersion` kullanır. .NET SDK bu değerin sonuna commit kimliğini ekleyebilir (örn. `1.0.0+abc123`) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -244,8 +249,9 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 6 | Infrastructure: SqlitePuanDeposu + testler | ✅ 74 test (Core 52 + Infrastructure 22), commit atıldı |
 | 7 | Infrastructure: SesUreteci, NAudioSesCalar + testler | ✅ build/test geçti, commit atıldı (81 test metodu) |
 | 8a | WinForms: Tema, OyunCizici (GDI+), OlcekHesaplayici, AnaForm, OdakAlmayanButon, FormsZamanlayici, MesajKutusuBildirici | ✅ build geçti, commit atıldı |
-| 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit bekleniyor |
-| 8c | S düzeltmesi (K61): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler güncellenir | |
+| 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
+| 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ⏳ yazıldı ve tarandı, build/test + commit bekleniyor (103 metot / 112 test) |
+| 8d | K65: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi | |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
@@ -273,3 +279,4 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - Test sayısını tahminle söyledi (Adım 5'te 69, Adım 6'da 76 dedi; doğrusu 67 ve 74). Bundan sonra test sayısı dosyalardaki `[TestMethod]` sayılarak verilir.
 - NAudio kodunu kurulan sürümü kontrol etmeden, hafızadaki NAudio 2 API'siyle yazdı. Kurulan sürüm 3.3.0 çıktı ve build kırıldı. Bundan sonra yeni bir paket eklenince önce kurulan sürüm ve onun API'si kaynaktan kontrol edilir.
 - M24 #3 (veritabanı ya da klasör yeniden oluşturulunca loga yazılsın) uygulanmamış, CK16 (Bilgi seviyesi loglanır) için de kodda hiç Bilgi logu yoktu. Ali logs klasörünü boş görünce ortaya çıktı. 8c'de K63 ile düzeltilecek.
+- Ali'ye "kendi sınıflarımızı `new` ile oluşturan tek yer fabrika" dedi, ama `EngelAlani` ve `NAudioSesCalar` içinde de `new` vardı. 8c taramasında ortaya çıktı. Bundan sonra böyle bir iddia taramayla doğrulanmadan söylenmez.

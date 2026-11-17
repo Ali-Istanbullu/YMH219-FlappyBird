@@ -10,24 +10,16 @@ namespace AliBird.Infrastructure.Persistence;
 // Veritabani: %LocalAppData%\AliBird\data\alibird.db
 // Tablo     : Rekor(Id = 1, Puan, Tarih) -> her zaman TEK satir; yeni rekor gelince guncellenir.
 //
-// Tek sorumlulugu: rekoru diske yazmak ve diskten okumak (S).
-// Core bu sinifi tanimaz; sadece IPuanDeposu'yu bilir (DIP).
+// Tek sorumlulugu (K61, Adim 8c'de daraltildi): rekoru diske yazmak ve diskten okumak (S).
+// Bozuk dosyayi kurtarma isi IBozukVeritabaniKurtarici'da.
 //
 // Hata davranisi:
-//  - Dosya ya da klasor silindiyse: bir sonraki istekte sessizce yeniden olusturulur (K16, M24 #3).
-//  - Dosya bozuksa: kenara alinir (silinmez), yerine bos veritabani olusur, kullaniciya
-//    "rekor sifirlandi" denir (M24 #4, CK23, CK24).
-//  - Diger hatalar (izin yok, disk dolu ...): exception cagirana (OyunYoneticisi) gider,
-//    o da kullaniciya gosterir (M24 #1, #2, CK4).
+//  - Dosya ya da klasor silindiyse: bir sonraki istekte yeniden olusturulur ve loga yazilir (K16, M24 #3).
+//  - Dosya bozuksa: kurtariciya devredilir (M24 #4).
+//  - Diger hatalar (izin yok, disk dolu ...): cagirana (RekorYoneticisi) gider; o kullaniciya gosterir.
 public sealed class SqlitePuanDeposu : IPuanDeposu
 {
-    // SQLite'in "dosya bozuk" hata kodlari (sqlite.org/rescode.html):
-    //   11 = SQLITE_CORRUPT : veritabani bozuk
-    //   26 = SQLITE_NOTADB  : dosya bir SQLite veritabani degil
-    private const int SqliteBozuk = 11;
-    private const int SqliteVeritabaniDegil = 26;
-
-    // Tablo yoksa olusturur. "CHECK (Id = 1)": tabloya ikinci bir satir eklenmesi imkansiz (tek rekor, K10).
+    // Tablo yoksa olusturur. "CHECK (Id = 1)": ikinci satir eklenemez (tek rekor, K10).
     private const string TabloOlusturSql =
         "CREATE TABLE IF NOT EXISTS Rekor (" +
         " Id    INTEGER PRIMARY KEY CHECK (Id = 1)," +
@@ -36,27 +28,26 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
 
     private const string OkuSql = "SELECT Puan, Tarih FROM Rekor WHERE Id = 1";
 
-    // UPSERT: satir yoksa ekler, varsa gunceller. Boylece tablo hep tek satir kalir.
+    // UPSERT: satir yoksa ekler, varsa gunceller.
     private const string YazSql =
         "INSERT INTO Rekor (Id, Puan, Tarih) VALUES (1, $puan, $tarih) " +
         "ON CONFLICT(Id) DO UPDATE SET Puan = excluded.Puan, Tarih = excluded.Tarih";
 
-    // CK25: tarih "o" bicimiyle saklanir, ornek: 2026-11-17T15:08:30.1230000+03:00
-    // (saat dilimi bilgisi kaybolmaz, geri okurken ayni an elde edilir).
+    // CK25: tarih "o" bicimiyle saklanir (saat dilimi kaybolmaz).
     private const string TarihBicimi = "o";
 
     private readonly IUygulamaYollari _yollar;
-    private readonly IHataBildirici _hataBildirici;
-    private readonly ISaat _saat;
+    private readonly IBozukVeritabaniKurtarici _kurtarici;
+    private readonly IGunlukcu _gunlukcu;
 
-    public SqlitePuanDeposu(IUygulamaYollari yollar, IHataBildirici hataBildirici, ISaat saat)
+    public SqlitePuanDeposu(IUygulamaYollari yollar, IBozukVeritabaniKurtarici kurtarici, IGunlukcu gunlukcu)
     {
         ArgumentNullException.ThrowIfNull(yollar);
-        ArgumentNullException.ThrowIfNull(hataBildirici);
-        ArgumentNullException.ThrowIfNull(saat);
+        ArgumentNullException.ThrowIfNull(kurtarici);
+        ArgumentNullException.ThrowIfNull(gunlukcu);
         _yollar = yollar;
-        _hataBildirici = hataBildirici;
-        _saat = saat;
+        _kurtarici = kurtarici;
+        _gunlukcu = gunlukcu;
     }
 
     public async Task<RekorKaydi?> RekoruOkuAsync(CancellationToken iptal = default)
@@ -65,13 +56,13 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         {
             return await OkuAsync(iptal);
         }
-        catch (Exception hata) when (BozukMu(hata))
+        catch (Exception hata) when (_kurtarici.BozukMu(hata))
         {
             // M24 #4: bozuk dosya kenara alinir, rekor yokmus gibi devam edilir.
-            BozukDosyayiKenaraAl(hata);
+            _kurtarici.KenaraAl(hata);
             return null;
         }
-        // Diger hatalar bilerek yakalanmaz: OyunYoneticisi yakalayip kullaniciya gosterir (CK4).
+        // Diger hatalar bilerek yakalanmaz: RekorYoneticisi yakalayip kullaniciya gosterir (CK4).
     }
 
     public async Task RekoruKaydetAsync(RekorKaydi rekor, CancellationToken iptal = default)
@@ -82,11 +73,10 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         {
             await YazAsync(rekor, iptal);
         }
-        catch (Exception hata) when (BozukMu(hata))
+        catch (Exception hata) when (_kurtarici.BozukMu(hata))
         {
-            // Bozuk dosyayi kenara al ve yeni (bos) veritabanina BIR KEZ daha yazmayi dene;
-            // boylece kullanicinin az once kirdigi rekor kaybolmaz.
-            BozukDosyayiKenaraAl(hata);
+            // Bozuk dosyayi kenara al ve yeni (bos) veritabanina BIR KEZ daha yaz; rekor kaybolmasin (CK23).
+            _kurtarici.KenaraAl(hata);
             await YazAsync(rekor, iptal);
         }
     }
@@ -108,7 +98,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
 
         int puan = okuyucu.GetInt32(0);
 
-        // Tarih metni bozuksa (elle degistirilmis vb.) FormatException olusur -> BozukMu yakalar.
+        // Tarih metni bozuksa FormatException -> kurtarici "bozuk" sayar.
         DateTime tarih = DateTime.Parse(okuyucu.GetString(1), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
         return new RekorKaydi(puan, tarih);
@@ -120,7 +110,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         await using SqliteCommand komut = baglanti.CreateCommand();
         komut.CommandText = YazSql;
 
-        // Parametre kullaniyoruz (metin birlestirme yok): SQL enjeksiyonuna ve bicim hatalarina karsi guvenli.
+        // Parametreli SQL: enjeksiyona ve bicim hatalarina karsi guvenli.
         komut.Parameters.AddWithValue("$puan", rekor.Puan);
         komut.Parameters.AddWithValue("$tarih", rekor.Tarih.ToString(TarihBicimi, CultureInfo.InvariantCulture));
 
@@ -132,6 +122,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
     {
         // VeritabaniDosyasi(): data klasoru silinmisse burada yeniden olusur (K16).
         string dosya = _yollar.VeritabaniDosyasi();
+        bool dosyaVardi = File.Exists(dosya);
 
         string baglantiMetni = new SqliteConnectionStringBuilder
         {
@@ -140,7 +131,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
             Pooling = false                          // CK22: is bitince dosya kilitli kalmasin
         }.ToString();
 
-        // SqliteConnection kutuphanenin kendi nesnesi; her islemde yenisi acilip kapatilir (CK22).
+        // Kutuphanenin kendi baglanti nesnesi; bu sinifin isi SQLite'a baglanmak (K62).
         var baglanti = new SqliteConnection(baglantiMetni);
         try
         {
@@ -150,51 +141,19 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
             komut.CommandText = TabloOlusturSql;
             await komut.ExecuteNonQueryAsync(iptal);   // bozuk dosyada hata genelde burada cikar
 
+            if (!dosyaVardi)
+            {
+                // M24 #3, K63: dosya yoktu (ilk acilis ya da kullanici sildi) -> yeniden olusturuldu.
+                _gunlukcu.Bilgi($"Veritabanı dosyası bulunamadı, yeniden oluşturuldu: {dosya}");
+            }
+
             return baglanti;
         }
         catch
         {
-            // Acilamadiysa kapat ve hatayi yukari ilet (R4: kaynak sizmasin).
+            // Acilamadiysa kapat ve hatayi yukari ilet (kaynak sizmasin).
             await baglanti.DisposeAsync();
             throw;
         }
-    }
-
-    // Hata "veritabani bozuk" turunden mi?
-    private static bool BozukMu(Exception hata) =>
-        hata is FormatException ||
-        hata is SqliteException { SqliteErrorCode: SqliteBozuk or SqliteVeritabaniDegil };
-
-    // CK23: bozuk dosyayi silmeden yeniden adlandirir (veri kurtarilabilsin), kullaniciya bildirir.
-    private void BozukDosyayiKenaraAl(Exception bozuklukHatasi)
-    {
-        try
-        {
-            string dosya = _yollar.VeritabaniDosyasi();
-            if (File.Exists(dosya))
-            {
-                string yeniAd = Path.Combine(
-                    Path.GetDirectoryName(dosya)!,
-                    $"alibird.corrupt-{_saat.Simdi:yyyyMMddHHmmss}.db");
-                File.Move(dosya, yeniAd, overwrite: true);
-            }
-        }
-        catch (Exception kenaraAlmaHatasi)
-        {
-            // Yeniden adlandirilamazsa (kilit, izin ...) silmeyi dene; o da olmazsa loga yaz.
-            _hataBildirici.Bildir(kenaraAlmaHatasi, Gorunurluk.SadeceGunluk, string.Empty);
-            try
-            {
-                File.Delete(_yollar.VeritabaniDosyasi());
-            }
-            catch (Exception silmeHatasi)
-            {
-                _hataBildirici.Bildir(silmeHatasi, Gorunurluk.SadeceGunluk, string.Empty);
-            }
-        }
-
-        // M24 #4: kullanici bilmeli (E).
-        _hataBildirici.Bildir(bozuklukHatasi, Gorunurluk.EkranVeGunluk,
-            "Rekor verisi bozuktu ve sıfırlandı. Yeni rekorlar normal şekilde kaydedilecek.");
     }
 }

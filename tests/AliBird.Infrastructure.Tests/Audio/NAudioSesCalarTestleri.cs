@@ -15,7 +15,7 @@ public sealed class NAudioSesCalarTestleri
     {
         var hata = new SahteHataBildirici();
 
-        var calar = new NAudioSesCalar(new HataVerenSesUreteci(), hata);
+        var calar = new NAudioSesCalar(new HataVerenSesUreteci(), hata, new SahteGunlukcu());
 
         Assert.IsFalse(calar.KullanilabilirMi);                         // sag altta "Ses yok"
         Assert.AreEqual(Gorunurluk.SadeceGunluk, hata.Bildirimler.Single().Gorunurluk);
@@ -27,7 +27,7 @@ public sealed class NAudioSesCalarTestleri
     public void KapattiktanSonra_CalVeTekrarKapat_Cokmez()
     {
         // Gercek uretici: bilgisayarda ses cihazi varsa acilir, yoksa sessiz moda gecer. Iki durumda da cokmemeli.
-        var calar = new NAudioSesCalar(new SesUreteci(), new SahteHataBildirici());
+        var calar = new NAudioSesCalar(new SesUreteci(), new SahteHataBildirici(), new SahteGunlukcu());
 
         calar.Dispose();
 
