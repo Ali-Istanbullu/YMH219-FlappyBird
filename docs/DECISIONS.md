@@ -213,6 +213,9 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK52 | K66 arayüzlerinde sadece motorun kullandığı üyeler var (I). Örn. `IKus`'ta `Y`/`DikeyHiz` yok; bunları sadece `KusTestleri` somut sınıf üzerinden kullanıyor. `IOyunMotoruFabrikasi.Olustur` somut `OyunMotoru` döndürmeye devam ediyor (presenter motorun tamamını kullanıyor, tek uygulaması var) | bildirildi |
 | CK53 | Adım 9 ölçümü: `IKareSuresiOlcer` / `KareSuresiOlcer` (Core/Services) iki kare arasındaki gerçek süreyi `IKronometre` (Stopwatch, monoton) ile ölçer. Duraklatma ve bekleme süreleri ölçüme girmez. Her oyun sonunda log satırına eklenir: `Oyun bitti. Puan: N. Kare araligi: ort X ms (min / max), N aralik, ~F FPS`. Kalıcıdır (performans sorunu olursa logdan görülür) | bildirildi |
 | CK54 | Log silme testi (K16): oyun açıkken `logs` silinemiyor, çünkü Windows açık log dosyasını kilitliyor. Kapattıktan sonra silinince bir sonraki açılışta yeniden oluştu. Rekor `data` klasöründe olduğu için etkilenmedi. Beklenen davranış, kod değişikliği yok | bildirildi |
+| CK55 | Kuş çizimi `SahneCizici`'den `KusCizici`'ye (`IKusCizici`) ayrıldı. Oyun ve ikon aynı kodla aynı kuşu çizer. İkon: yuvarlak köşeli gece mavisi kare (`Gokyuzu` rengi), ortada oyundaki kuş, her kenarda %10 boşluk | bildirildi |
+| CK56 | `AliBird.IconGenerator` (Exe, WinForms projesine referans verir). Boyutlar 16/24/32/48/64/128/256. ICO içinde PNG girdileri var (Vista+). Çıktı `assets/alibird.png` ve `assets/alibird.ico`, ikisi de repoya girer. Araçta DI kütüphanesi yok, nesneler `Program.cs`'te bağlanır (4 nesne). Exe ikonu `ApplicationIcon` (dosya yoksa build kırılmaz), pencere ikonu exe'den okunur | bildirildi |
+| CK57 | Kurulum betiği `installer/AliBird.iss`. Uygulama `dotnet publish -c Release -r win-x64 --self-contained false` ile `publish/AliBird`'e yayınlanır (`publish/` gitignore'da). Runtime kontrolü: `{commonpf64}\dotnet\shared\Microsoft.WindowsDesktop.App\10.*` klasörü. İndirme bağlantısı: `https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe` (Microsoft'un sabit 'son sürüm' bağlantısı). Sessiz kurulum: `/install /quiet /norestart`. Başarılı sayılan çıkış kodları: 0, 3010, 1641. Kurulumdan sonra klasör yeniden kontrol edilir. Hata olursa mesaj gösterilir ve kurulum 'Kur' sayfasında kalır (yeniden denenebilir ya da iptal edilebilir) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -262,9 +265,9 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
 | 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
 | 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ✅ 118 test, commit atıldı (f5960c1, 665d98b) |
-| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ delta time yazıldı (K68), oynanış denemesi bekleniyor |
-| 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
-| 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
+| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ✅ delta time, commit atıldı (54a0951) |
+| 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | ✅ ikon doğrulandı (7 boyut, PNG) |
+| 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | ⏳ betik yazıldı (CK57), derleme + temiz makine testi bekleniyor |
 | 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |
 
 Proje yolu: `C:\Projeler\YMH219-FlappyBird`

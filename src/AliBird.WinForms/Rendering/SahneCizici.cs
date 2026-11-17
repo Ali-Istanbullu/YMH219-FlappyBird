@@ -13,13 +13,16 @@ public sealed class SahneCizici : IKatmanCizici
     private const float AgizTasmasi = 4f;   // her yana 4 px
 
     private readonly CizimKaynaklari _kaynaklar;
+    private readonly IKusCizici _kusCizici;   // CK55: kus ikonla ortak
     private readonly OyunAyarlari _ayarlar;
 
-    public SahneCizici(CizimKaynaklari kaynaklar, OyunAyarlari ayarlar)
+    public SahneCizici(CizimKaynaklari kaynaklar, IKusCizici kusCizici, OyunAyarlari ayarlar)
     {
         ArgumentNullException.ThrowIfNull(kaynaklar);
+        ArgumentNullException.ThrowIfNull(kusCizici);
         ArgumentNullException.ThrowIfNull(ayarlar);
         _kaynaklar = kaynaklar;
+        _kusCizici = kusCizici;
         _ayarlar = ayarlar;
     }
 
@@ -30,7 +33,7 @@ public sealed class SahneCizici : IKatmanCizici
             EngeliCiz(g, engel);
         }
         ZeminiCiz(g);
-        KusuCiz(g, goruntu.KusAlani);
+        _kusCizici.Ciz(g, goruntu.KusAlani);
     }
 
     // Boru: dolgu + kenar cizgisi + bosluga bakan uca genis bir "agiz".
@@ -64,32 +67,5 @@ public sealed class SahneCizici : IKatmanCizici
         float y = _ayarlar.ZeminUstY;
         g.FillRectangle(_kaynaklar.Zemin, 0f, y, _ayarlar.AlanGenisligi, _ayarlar.ZeminYuksekligi);
         g.DrawLine(_kaynaklar.ZeminCizgi, 0f, y, _ayarlar.AlanGenisligi, y);
-    }
-
-    // Kus: elips govde + kanat + goz + ucgen gaga. Olculer govdeye oranla verilir.
-    private void KusuCiz(Graphics g, RectangleF k)
-    {
-        // Govde
-        g.FillEllipse(_kaynaklar.KusGovde, k);
-        g.DrawEllipse(_kaynaklar.KusKenar, k);
-
-        // Kanat: govdenin sol-ortasinda kucuk bir elips
-        g.FillEllipse(_kaynaklar.KusKanat, k.X + k.Width * 0.08f, k.Y + k.Height * 0.45f, k.Width * 0.45f, k.Height * 0.35f);
-
-        // Goz: sag-ust tarafta beyaz daire ve icinde siyah bebek
-        float gozCapi = k.Height * 0.42f;
-        float gozX = k.X + k.Width * 0.58f;
-        float gozY = k.Y + k.Height * 0.12f;
-        g.FillEllipse(_kaynaklar.GozBeyaz, gozX, gozY, gozCapi, gozCapi);
-        g.FillEllipse(_kaynaklar.GozBebek, gozX + gozCapi * 0.45f, gozY + gozCapi * 0.3f, gozCapi * 0.4f, gozCapi * 0.4f);
-
-        // Gaga: govdenin sagindan disari tasan ucgen
-        PointF[] gaga =
-        [
-            new(k.Right - k.Width * 0.08f, k.Y + k.Height * 0.45f),
-            new(k.Right + k.Width * 0.28f, k.Y + k.Height * 0.60f),
-            new(k.Right - k.Width * 0.08f, k.Y + k.Height * 0.78f)
-        ];
-        g.FillPolygon(_kaynaklar.Gaga, gaga);
     }
 }

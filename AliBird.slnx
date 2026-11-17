@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/AliBird.Core/AliBird.Core.csproj" />
     <Project Path="src/AliBird.Infrastructure/AliBird.Infrastructure.csproj" />
+    <Project Path="src/AliBird.IconGenerator/AliBird.IconGenerator.csproj" />
     <Project Path="src/AliBird.WinForms/AliBird.WinForms.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -53,6 +53,7 @@ public sealed class AnaForm : Form, IOyunGorunumu
         MinimumSize = SizeFromClientSize(EnKucukBoyut);     // K5
         BackColor = tema.KenarBosluk;
         KeyPreview = true;                                  // tuslar once forma gelsin (G7)
+        PencereIkonunuYukle(hataBildirici);                 // Adim 10
 
         // CK33: cift tamponlama -> cizim sirasinda titreme olmaz.
         DoubleBuffered = true;
@@ -79,6 +80,19 @@ public sealed class AnaForm : Form, IOyunGorunumu
         KeyUp += TusBirakildiginda;
         Deactivate += (_, _) => OlayiTetikle(OdakKaybedildi);   // K11: baska pencereye gecildi
         Resize += BoyutDegistiginde;
+    }
+
+    // Pencerenin sol ust ikonu = exe'ye gomulu alibird.ico. Bulunamazsa varsayilan ikon kalir (R4).
+    private void PencereIkonunuYukle(IHataBildirici hataBildirici)
+    {
+        try
+        {
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? Icon;
+        }
+        catch (Exception hata)
+        {
+            hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
+        }
     }
 
     // ================= IOyunGorunumu =================

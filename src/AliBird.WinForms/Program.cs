@@ -127,6 +127,7 @@ internal static class Program
         servisler.AddSingleton<IOlcekHesaplayici, OlcekHesaplayici>();            // K65
         servisler.AddSingleton<CizimKaynaklari>();                                 // GDI+ kaynak paketi
         servisler.AddSingleton<IYaziCizici, YaziCizici>();
+        servisler.AddSingleton<IKusCizici, KusCizici>();                           // CK55
         // Cizim katmanlari: KAYIT SIRASI = CIZIM SIRASI (arkadan one). Yeni katman = yeni satir (O).
         servisler.AddSingleton<IKatmanCizici, SahneCizici>();
         servisler.AddSingleton<IKatmanCizici, BilgiCizici>();
