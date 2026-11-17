@@ -72,6 +72,10 @@ internal static class Program
             {
                 gunlukcu.Bilgi($"AliBird {Application.ProductVersion} açıldı.");   // K63
 
+                // K67: 16 ms'lik zamanlayici gercekten ~16 ms'de calissin. Kendi hatalarini yakalar.
+                // Geri alma: "using (servisler)" kapanirken container Dispose eder.
+                servisler.GetRequiredService<IZamanlayiciCozunurlugu>().Artir();
+
                 AnaForm form = servisler.GetRequiredService<AnaForm>();
                 OyunYoneticisi yonetici = servisler.GetRequiredService<OyunYoneticisi>();
                 PencereOlaylariniBagla(form, yonetici, servisler.GetRequiredService<IHataBildirici>());
@@ -119,6 +123,7 @@ internal static class Program
         servisler.AddSingleton<ISesCalar, NAudioSesCalar>();
         servisler.AddSingleton<ISaat, SistemSaati>();
         servisler.AddSingleton<IKronometre, SistemKronometresi>();                 // CK53: monoton sayac
+        servisler.AddSingleton<IZamanlayiciCozunurlugu, WindowsZamanlayiciCozunurlugu>();   // K67 (Dispose: geri alir)
         servisler.AddSingleton<IRastgele, SistemRastgele>();
 
         // ---- WinForms ----

@@ -150,6 +150,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K64 | DI paketi: **Microsoft.Extensions.DependencyInjection 11.0.0** (csproj'dan okundu) |
 | K65 | 8c taramasından sonra (a): `EngelAlani` içindeki `new Engel` ve `NAudioSesCalar` içindeki `new DiziSesSaglayici` üretici arayüzlerine taşınır (`IEngelUretici`, `ISesSaglayiciUretici`). `IOyunCizici`, `IOlcekHesaplayici`, `ICarpismaDenetcisi` arayüzleri eklenir. `OyunCizici` `SahneCizici`, `BilgiCizici` ve `DurumKatmaniCizici` olarak bölünür. Ayrı bir commit olarak yapılır (8d) |
 | K66 | CK51 için (b): `OyunMotoru` tüm parçalarını arayüz olarak alır (`IKus`, `IEngelAlani`, `IHizDenetcisi`, `IPuanTablosu`). Somut sınıfları bilen tek yer fabrika. Motor sahte parçalarla da test edilir (`OyunMotoruSiraTestleri`). 8d commit'ine dahil |
+| K67 | Adım 9 ölçümü (7 oyun): 16 ms'lik zamanlayıcı ortalama 27.6–30.1 ms'de bir çalıştı (min ~15, max ~45–50 ms), yani ~33–36 FPS. Oyun hedef hızın ~%58'inde aktı. Ali (c): önce Windows zamanlayıcı çözünürlüğü 1 ms'ye çekilir (`timeBeginPeriod(1)`, kapanışta `timeEndPeriod(1)`, `WindowsZamanlayiciCozunurlugu`). Ölçüm hâlâ kötüyse zamana bağlı fizik (delta time) yapılır |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -210,6 +211,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK51 | `OyunMotoru`'nun somut varlık nesneleri (`Kus`, `EngelAlani`, `HizDenetcisi`, `PuanTablosu`) Ali'ye soruldu → K66 (b) | Ali karar verdi |
 | CK52 | K66 arayüzlerinde sadece motorun kullandığı üyeler var (I). Örn. `IKus`'ta `Y`/`DikeyHiz` yok; bunları sadece `KusTestleri` somut sınıf üzerinden kullanıyor. `IOyunMotoruFabrikasi.Olustur` somut `OyunMotoru` döndürmeye devam ediyor (presenter motorun tamamını kullanıyor, tek uygulaması var) | bildirildi |
 | CK53 | Adım 9 ölçümü: `IKareSuresiOlcer` / `KareSuresiOlcer` (Core/Services) iki kare arasındaki gerçek süreyi `IKronometre` (Stopwatch, monoton) ile ölçer. Duraklatma ve bekleme süreleri ölçüme girmez. Her oyun sonunda log satırına eklenir: `Oyun bitti. Puan: N. Kare araligi: ort X ms (min / max), N aralik, ~F FPS`. Kalıcıdır (performans sorunu olursa logdan görülür) | bildirildi |
+| CK54 | Log silme testi (K16): oyun açıkken `logs` silinemiyor, çünkü Windows açık log dosyasını kilitliyor. Kapattıktan sonra silinince bir sonraki açılışta yeniden oluştu. Rekor `data` klasöründe olduğu için etkilenmedi. Beklenen davranış, kod değişikliği yok | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -259,7 +261,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
 | 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
 | 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ✅ 118 test, commit atıldı (f5960c1, 665d98b) |
-| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ ölçüm kodu yazıldı (CK53), Ali'nin oynayıp log göndermesi bekleniyor |
+| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ ölçüldü (~35 FPS, K67), çözünürlük düzeltmesi yazıldı, yeniden ölçüm bekleniyor |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
 | 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |
@@ -272,7 +274,7 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - Ses karakteri: her sesin tonu, süresi, seviyesi (Adım 7)
 - Görünüm: renkler, yazı tipi ve boyutu, Game Over metinleri (Adım 8)
 - Timer aralığı ve fizik/hız değerleri, ölçüme dayanarak (Adım 9)
-- **UNUTMA (Ali istedi):** Oyun açıkken `logs` klasörü silinirse ne olduğu elle denenecek (K16, Adım 9)
+- ~~**UNUTMA (Ali istedi):** Oyun açıkken `logs` klasörü silinirse ne olduğu elle denenecek (K16, Adım 9)~~ → yapıldı, CK54
 - Runtime dışında bir ön koşul gerekip gerekmediği, temiz bilgisayarda test edilerek (Adım 11)
 - Kod Sözlüğü'nün içeriği (Adım 12)
 
