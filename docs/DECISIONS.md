@@ -218,6 +218,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK57 | Kurulum betiği `installer/AliBird.iss`. Uygulama `dotnet publish -c Release -r win-x64 --self-contained false` ile `publish/AliBird`'e yayınlanır (`publish/` gitignore'da). Runtime kontrolü: `{commonpf64}\dotnet\shared\Microsoft.WindowsDesktop.App\10.*` klasörü. İndirme bağlantısı: `https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe` (Microsoft'un sabit 'son sürüm' bağlantısı). Sessiz kurulum: `/install /quiet /norestart`. Başarılı sayılan çıkış kodları: 0, 3010, 1641. Kurulumdan sonra klasör yeniden kontrol edilir. Hata olursa mesaj gösterilir ve kurulum 'Kur' sayfasında kalır (yeniden denenebilir ya da iptal edilebilir) | bildirildi |
 | CK58 | Kaldırma: kurulumun koyduğu her dosya ve kısayol silinir. `[UninstallDelete]` ile `Program Files\AliBird` klasörü sonradan oluşan dosyalarla birlikte tamamen silinir. `%LocalAppData%\AliBird` (rekor ve loglar) silinmez. .NET Desktop Runtime da kaldırılmaz, çünkü ortak bir sistem bileşeni ve başka programlar da kullanabilir. `aka.ms` bağlantısını Ali tarayıcıda denedi, 10.0.15 indi | bildirildi |
 | CK59 | Kurulum dosyası Inno Setup 7.1.0 ile uyarısız derlendi. Kurulum pakete `.pdb` dosyalarını almaz (`Excludes: "*.pdb"`) | bildirildi |
+| CK60 | README (Türkçe, G13 başlıkları + Kod Sözlüğü + sınırlamalar + kaynaklar) ve LICENSE (MIT, Copyright (c) 2026 Ali İstanbullu) yazıldı. Ekran görüntüleri `docs/screenshots/hazir.jpg`, `duraklatildi.jpg`, `oyun-bitti.jpg`; Ali çekecek. Release, temiz makine testinden sonra yapılacak | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -270,7 +271,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ✅ delta time, commit atıldı (54a0951) |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | ✅ ikon doğrulandı (7 boyut, PNG) |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | ⏳ derlendi, Ali'nin bilgisayarında kurma/kaldırma sorunsuz. **Temiz makine testi bekliyor** (Ali sonra yapacak) |
-| 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |
+| 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | ⏳ yazıldı (CK60), ekran görüntüleri + Release bekleniyor |
 
 Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 
