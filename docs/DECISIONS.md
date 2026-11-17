@@ -2,13 +2,13 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 3 tamamlandı (31 test geçti).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 4 yazıldı (build/test bekleniyor).
 
 ---
 
 ## 0. Claude için çalışma kuralları (Ali'nin kuralları)
 
-1. **Kararları Ali verir.** Claude hiçbir kararı tek başına almaz. Karar noktasında seçenekleri artı/eksi ile sunar ve bekler. Ali "sen seç/ayarla" derse Claude öneri yapar, öneri onaylanınca karar olur.
+1. **Kararları Ali verir** (önemli olanlar, bkz. R5). Mantıksal ve teknik ayrıntılara Claude karar verir ve CK olarak deftere yazar. Karar noktasında seçenekleri artı/eksi ile sunar ve bekler. Ali "sen seç/ayarla" derse Claude öneri yapar, öneri onaylanınca karar olur.
 2. **Aşamalar sırayla ilerler:** Gereksinim → Mimari → Kodlama. Aşama ya da adım geçişi Ali'nin **açık onayı** olmadan yapılmaz. "Hepsini onaylıyorum" yalnızca sorulan maddeleri kapsar, aşama geçişini kapsamaz.
 3. **Kodlama adım adım yürür.** Bir adım bitmeden ve Ali onaylamadan sonraki adımın kodu yazılmaz.
 4. **Veri gerçek kaynaktan gelir.** Uydurma değer kullanılmaz, kaynağı belirsiz değer "doğrulanmadı" diye işaretlenir. Paket sürümleri NuGet'ten ya da Ali'nin makinesindeki çıktıdan alınır.
@@ -134,7 +134,26 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K49 | İlk oyunda (rekor yokken) "Yeni Rekor" vurgusu çıkmaz. Rekora eşit puan rekor sayılmaz (E7 b/a) |
 | K50 | İlk oyunda 0 puan rekor olarak kaydedilmez, 1 ve üstü puan ilk rekor olur |
 | K51 | Zemin çarpışmasında da 3 px küçültülmüş kutu kullanılır (kuş görselde zemine 3 px girer, sonra oyun biter) |
+| R5 | **(17.11.2026'dan itibaren)** Uygulama içindeki mantıksal ve teknik ayrıntılara Claude karar verir, her birini deftere "Claude kararı" (CK) olarak yazar ve Ali'ye bildirir. Ali'ye yalnızca **önemli** sorular sorulur: kullanıcının gördüğü davranışı, veri kaybını, Ali'nin kurallarını (R1–R4, K14–K18), mimariyi veya yeni paket/bağımlılığı etkileyenler. Ali her CK'yi geri çevirebilir |
+| K52 | Rekor, oyun bitince kaydedilir. Ayrıca oyun sürerken (oynanırken veya duraklatılmışken) pencere kapatılırsa da kaydedilir (Adım 4: b) |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
+
+### Claude kararları (CK, R5 gereği; Ali her birini geri çevirebilir)
+| # | Karar | Durum |
+|---|---|---|
+| CK1 | Hazır'da Space oyunu başlatır ve kuşu zıplatır. Oynarken Space zıplatır. P duraklatır, duraklatılmışken P devam ettirir. Duraklatılmışken Space etkisizdir. Odak kaybı yalnızca oynarken duraklatır, oyun kendiliğinden devam etmez | Ali onayladı |
+| CK2 | Game Over'dan sonra 750 ms boyunca Space dikkate alınmaz (Chrome `GAMEOVER_CLEAR_TIME: 750`). Buton bu kurala bağlı değildir | Ali onayladı |
+| CK3 | Her kare try/catch içinde çalışır. Hata loglanır ve o kare atlanır. Üst üste 3 hatada oyun durur ve kullanıcıya mesaj **bir kez** gösterilir. Aynı hata her karede tekrarlanırsa log dosyası doldurulmaz | Ali onayladı (log sınırı eklendi) |
+| CK4 | Açılışta rekor okunamazsa hata hem ekrana hem loga yazılır, oyun rekorsuz başlar | Ali onayladı |
+| CK5 | M tuşu her durumda çalışır | Ali onayladı |
+| CK6 | Kapanışta rekor kaydı için en fazla 2 sn beklenir | Ali onayladı |
+| CK7 | Yeniden başlatınca önce Hazır ekranı ("başlamak için tuşa bas") gelir, oyun doğrudan başlamaz | bildirildi |
+| CK8 | Her oyuna özel parçaları (Kus, EngelAlani, HizDenetcisi, PuanTablosu) `OyunMotoruFabrikasi` `new` ile üretir. Durum tutmayan `CarpismaDenetcisi` DI'dan tek örnek olarak gelir. R2'nin istisnası yalnızca fabrikadır | bildirildi |
+| CK9 | Kullanıcıya gösterilen metinler düzgün Türkçe karakterli yazılır ("Rekor okunamadı"). ASCII kuralı yalnızca isimler ve yorumlar için geçerlidir | bildirildi |
+| CK10 | Zamanlayıcı her zaman çalışır: Hazır ve duraklatma ekranında yalnızca çizim yapılır. Aralık geçici olarak 16 ms, Adım 9'da ölçülecek | bildirildi |
+| CK11 | Tuş işlemlerindeki hatalar yalnızca loga yazılır. Ses çalma hatası da yalnızca loga yazılır, kullanıcı bunu "Ses yok" göstergesinden görür | bildirildi |
+| CK12 | Rekor kaydı başarısız olsa bile o oturum boyunca yeni rekor geçerli sayılır | bildirildi |
+| CK13 | `IOyunMotoruFabrikasi` somut `OyunMotoru` döndürür (ayrı bir `IOyunMotoru` arayüzü yok). Testler gerçek motoru `SahteRastgele` ile kullanır | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -175,8 +194,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 |---|---|---|
 | 1 | İskelet: solution, projeler, referanslar, global.json, .gitignore | ✅ build ve 2/2 test geçti, csproj/global.json/.slnx/.gitignore Claude tarafından doğrulandı, commit atıldı |
 | 2 | Core: arayüzler ve veri tipleri | ✅ build başarılı, commit atıldı. `IOyunMotoruFabrikasi` Adım 4'e kaldı (OyunMotoru o adımda yazılacak) |
-| 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | ✅ 31 test geçti, commit bekleniyor |
-| 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | |
+| 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | ✅ 31 test geçti, commit atıldı |
+| 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | ⏳ yazıldı, build/test bekleniyor |
 | 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici + testler | |
 | 6 | Infrastructure: SqlitePuanDeposu + testler | |
 | 7 | Infrastructure: SesUreteci, NAudioSesCalar | |

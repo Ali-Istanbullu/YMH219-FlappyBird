@@ -65,6 +65,22 @@ public sealed record OyunAyarlari
     // Her karede hiza eklenen artis (skora degil kareye bagli).
     public float Ivme { get; init; } = 0.001f;
 
+    // ---- Oyun dongusu ve yonetim (Adim 4) ----
+
+    // Zamanlayicinin iki tik arasindaki suresi (ms). 16 ms ~ saniyede 60 kare hedefi.
+    // GECICI deger: gercek kare hizi Adim 9'da Ali'nin makinesinde olculup kesinlestirilecek.
+    public int ZamanlayiciAraligiMs { get; init; } = 16;
+
+    // Game Over'dan sonra Space'in dikkate alinmadigi sure (CK2).
+    // Kaynak: Chrome offline.js GAMEOVER_CLEAR_TIME: 750.
+    public int YenidenBaslatmaBeklemeMs { get; init; } = 750;
+
+    // Ust uste bu kadar karede hata olursa oyun durdurulur ve kullaniciya bildirilir (CK3).
+    public int ArdisikHataSiniri { get; init; } = 3;
+
+    // Pencere kapanirken rekor kaydinin bitmesi icin beklenecek en uzun sure (CK6).
+    public int KapanisKayitBeklemeMs { get; init; } = 2000;
+
     // ---- Hesaplanan degerler (ayar degil, yukaridakilerden turetilir) ----
 
     // Zeminin ust kenarinin Y koordinati: 480 - 40 = 440. Kus bunun altina inerse oyun biter.
