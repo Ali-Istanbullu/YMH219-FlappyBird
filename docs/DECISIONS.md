@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 1 tamamlandı (commit bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 1 tamamlandı ve commit atıldı.
 
 ---
 
@@ -113,6 +113,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K28 | Solution dosyası **`AliBird.slnx`** |
 | K29 | Test paketi: **MSTest 4.0.2** (`dotnet new mstest` şablonundan, Ali'nin makinesindeki csproj'dan okundu). Şablon testleri paralel çalıştırıyor (`MSTestSettings.cs`) |
 | K30 | Bu dosya repoda **`docs/DECISIONS.md`** olarak tutulur (public) |
+| K31 | README ve LICENSE planda olduğu gibi **Adım 12'de** yazılır, erken iskelet README eklenmez |
 
 ## 4. Mimari (onaylı)
 
@@ -151,7 +152,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 
 | Adım | İçerik | Durum |
 |---|---|---|
-| 1 | İskelet: solution, projeler, referanslar, global.json, .gitignore | ✅ build ve 2/2 test geçti, csproj/global.json/.slnx/.gitignore Claude tarafından doğrulandı, commit bekleniyor |
+| 1 | İskelet: solution, projeler, referanslar, global.json, .gitignore | ✅ build ve 2/2 test geçti, csproj/global.json/.slnx/.gitignore Claude tarafından doğrulandı, commit atıldı |
 | 2 | Core: arayüzler ve veri tipleri | ⏳ |
 | 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | |
 | 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | |
