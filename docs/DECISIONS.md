@@ -217,6 +217,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK56 | `AliBird.IconGenerator` (Exe, WinForms projesine referans verir). Boyutlar 16/24/32/48/64/128/256. ICO içinde PNG girdileri var (Vista+). Çıktı `assets/alibird.png` ve `assets/alibird.ico`, ikisi de repoya girer. Araçta DI kütüphanesi yok, nesneler `Program.cs`'te bağlanır (4 nesne). Exe ikonu `ApplicationIcon` (dosya yoksa build kırılmaz), pencere ikonu exe'den okunur | bildirildi |
 | CK57 | Kurulum betiği `installer/AliBird.iss`. Uygulama `dotnet publish -c Release -r win-x64 --self-contained false` ile `publish/AliBird`'e yayınlanır (`publish/` gitignore'da). Runtime kontrolü: `{commonpf64}\dotnet\shared\Microsoft.WindowsDesktop.App\10.*` klasörü. İndirme bağlantısı: `https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe` (Microsoft'un sabit 'son sürüm' bağlantısı). Sessiz kurulum: `/install /quiet /norestart`. Başarılı sayılan çıkış kodları: 0, 3010, 1641. Kurulumdan sonra klasör yeniden kontrol edilir. Hata olursa mesaj gösterilir ve kurulum 'Kur' sayfasında kalır (yeniden denenebilir ya da iptal edilebilir) | bildirildi |
 | CK58 | Kaldırma: kurulumun koyduğu her dosya ve kısayol silinir. `[UninstallDelete]` ile `Program Files\AliBird` klasörü sonradan oluşan dosyalarla birlikte tamamen silinir. `%LocalAppData%\AliBird` (rekor ve loglar) silinmez. .NET Desktop Runtime da kaldırılmaz, çünkü ortak bir sistem bileşeni ve başka programlar da kullanabilir. `aka.ms` bağlantısını Ali tarayıcıda denedi, 10.0.15 indi | bildirildi |
+| CK59 | Kurulum dosyası Inno Setup 7.1.0 ile uyarısız derlendi. Kurulum pakete `.pdb` dosyalarını almaz (`Excludes: "*.pdb"`) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -268,7 +269,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ✅ 118 test, commit atıldı (f5960c1, 665d98b) |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ✅ delta time, commit atıldı (54a0951) |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | ✅ ikon doğrulandı (7 boyut, PNG) |
-| 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | ⏳ betik yazıldı (CK57), derleme + temiz makine testi bekleniyor |
+| 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | ⏳ derlendi, Ali'nin bilgisayarında kurma/kaldırma sorunsuz. **Temiz makine testi bekliyor** (Ali sonra yapacak) |
 | 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |
 
 Proje yolu: `C:\Projeler\YMH219-FlappyBird`
@@ -280,7 +281,7 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - Görünüm: renkler, yazı tipi ve boyutu, Game Over metinleri (Adım 8)
 - Timer aralığı ve fizik/hız değerleri, ölçüme dayanarak (Adım 9)
 - ~~**UNUTMA (Ali istedi):** Oyun açıkken `logs` klasörü silinirse ne olduğu elle denenecek (K16, Adım 9)~~ → yapıldı, CK54
-- Runtime dışında bir ön koşul gerekip gerekmediği, temiz bilgisayarda test edilerek (Adım 11)
+- **UNUTMA:** Temiz makine testi (Sandbox / VM / başka PC): indirme + runtime kurulumu + oyun açılıyor mu. Runtime dışında bir ön koşul gerekiyor mu (Adım 11, G15)
 - Kod Sözlüğü'nün içeriği (Adım 12)
 
 ## 7. Claude'un yaptığı hatalar (tekrarlanmayacak)

@@ -52,7 +52,8 @@ Name: "masaustu"; Description: "Masaüstüne kısayol oluştur"; GroupDescriptio
 Name: "baslatmenusu"; Description: "Başlat menüsüne kısayol oluştur"; GroupDescription: "Kısayollar:"
 
 [Files]
-Source: "{#YayinKlasoru}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; .pdb (hata ayiklama sembolleri) kullaniciya gerekmez, kurulum kucuk kalsin (CK59)
+Source: "{#YayinKlasoru}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autodesktop}\{#UygulamaAdi}"; Filename: "{app}\{#ExeAdi}"; Tasks: masaustu
