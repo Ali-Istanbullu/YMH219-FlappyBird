@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 1 tamamlandı ve commit atıldı.
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 3 tamamlandı (31 test geçti).
 
 ---
 
@@ -114,6 +114,27 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K29 | Test paketi: **MSTest 4.0.2** (`dotnet new mstest` şablonundan, Ali'nin makinesindeki csproj'dan okundu). Şablon testleri paralel çalıştırıyor (`MSTestSettings.cs`) |
 | K30 | Bu dosya repoda **`docs/DECISIONS.md`** olarak tutulur (public) |
 | K31 | README ve LICENSE planda olduğu gibi **Adım 12'de** yazılır, erken iskelet README eklenmez |
+| K32 | `OyunAyarlari` bir `sealed record` olarak DI'a Singleton kaydedilir, değerler constructor ile alınır (D1b) |
+| K33 | `IPuanDeposu` **async** (`Task`, `CancellationToken`) çalışır (D2b) |
+| K34 | Rekor yoksa `null` döner (D3a) |
+| K35 | Sesin kapalı olup olmadığına (M tuşu) presenter karar verir. Ses kapalıysa `Cal()` hiç çağrılmaz. `ISesCalar` yalnızca ses çalar (D4b) |
+| K36 | Form ham olay yayar: `BoslukBasildi`, `PBasildi`, `MBasildi`, `YenidenBaslatTiklandi`, `OdakKaybedildi`. Durumu presenter yorumlar (D5a) |
+| K37 | `OyunGoruntusu` alanları: `Durum`, `KusAlani`, `Engeller` (her biri üst+alt `RectangleF`), `Puan`, `Rekor?`, `YeniRekorMu`, `SesDurumu` (`Acik/Kapali/Yok`) (D6) |
+| K38 | `IHataBildirici.Bildir(Exception hata, Gorunurluk gorunurluk, string kullaniciMesaji)` (D7) |
+| K39 | Core klasör düzeni: `Abstractions/`, `Models/`, `Configuration/` (klasör, dosya ve namespace adları İngilizce kalabilir). Kod tarafı (sınıf, metot, değişken) Türkçe. Türkçe adlar dosya adı veya namespace'de sorun çıkarırsa o yer İngilizce olur |
+| K40 | Koordinat ve hızlarda sayı tipi `float` (`RectangleF` ile uyumlu) |
+| K41 | Yorumlar Türkçe ve ASCII yazılır (ı/ş/ğ/ü/ö/ç kullanılmaz) |
+| K42 | Claude kod dosyalarını doğrudan `C:\Projeler\YMH219-FlappyBird` klasörüne yazar, Ali derler, inceler ve commit atar |
+| K43 | Kuş x = 100, başlangıç y = 208 (E1a) |
+| K44 | Hazır ekranında kuş sabit durur (E2a) |
+| K45 | Puan, kuşun sol kenarı engelin sağ kenarını tamamen geçince artar (E3a) |
+| K46 | Çarpışma kutusu her kenardan 3 px küçük, 24×18 (E4b) |
+| K47 | İlk engel x = 960'tan başlar, engeller 320 arayla dizilir: 960, 1280, 1600. 3 engel yeniden kullanılır (E5b, G2) |
+| K48 | Tavana değen kuşun dikey hızı korunur (E6b) |
+| K49 | İlk oyunda (rekor yokken) "Yeni Rekor" vurgusu çıkmaz. Rekora eşit puan rekor sayılmaz (E7 b/a) |
+| K50 | İlk oyunda 0 puan rekor olarak kaydedilmez, 1 ve üstü puan ilk rekor olur |
+| K51 | Zemin çarpışmasında da 3 px küçültülmüş kutu kullanılır (kuş görselde zemine 3 px girer, sonra oyun biter) |
+| R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
 
 ## 4. Mimari (onaylı)
 
@@ -153,8 +174,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | Adım | İçerik | Durum |
 |---|---|---|
 | 1 | İskelet: solution, projeler, referanslar, global.json, .gitignore | ✅ build ve 2/2 test geçti, csproj/global.json/.slnx/.gitignore Claude tarafından doğrulandı, commit atıldı |
-| 2 | Core: arayüzler ve veri tipleri | ⏳ |
-| 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | |
+| 2 | Core: arayüzler ve veri tipleri | ✅ build başarılı, commit atıldı. `IOyunMotoruFabrikasi` Adım 4'e kaldı (OyunMotoru o adımda yazılacak) |
+| 3 | Core: Kus, Engel, EngelAlani, CarpismaDenetcisi, HizDenetcisi, PuanTablosu + testler | ✅ 31 test geçti, commit bekleniyor |
 | 4 | Core: OyunMotoru, fabrika, OyunYoneticisi + testler | |
 | 5 | Infrastructure: UygulamaYollari, SerilogGunlukcu, HataBildirici + testler | |
 | 6 | Infrastructure: SqlitePuanDeposu + testler | |

@@ -1,0 +1,76 @@
+using System.Drawing;
+using AliBird.Core.Configuration;
+
+namespace AliBird.Core.Gameplay;
+
+// Oyuncunun kontrol ettigi kus (G1).
+// Tek sorumlulugu: kendi dikey hareketini (ziplama + yer cekimi) hesaplamak.
+// Carpip carpmadigina BAKMAZ; o is CarpismaDenetcisi'nin (S).
+public sealed class Kus
+{
+    // Tum sayisal degerler buradan okunur; sinifin icinde sabit sayi yok (D1b).
+    private readonly OyunAyarlari _ayarlar;
+
+    // Kusun sol ust kosesinin yatay konumu. Oyun boyunca degismez (E1a: x = 100).
+    public float X { get; }
+
+    // Kusun sol ust kosesinin dikey konumu. 0 = ekranin en ustu, buyudukce asagi iner.
+    public float Y { get; private set; }
+
+    // Dikey hiz (piksel/kare). Eksi = yukari cikiyor, arti = asagi dusuyor.
+    public float DikeyHiz { get; private set; }
+
+    public Kus(OyunAyarlari ayarlar)
+    {
+        // Ayarlar verilmezse sinif calisamaz; hatayi hemen ve acik sekilde bildir.
+        ArgumentNullException.ThrowIfNull(ayarlar);
+        _ayarlar = ayarlar;
+
+        X = ayarlar.KusX;
+        Y = ayarlar.KusBaslangicY;   // E1a: y = 208
+        DikeyHiz = 0f;               // Oyun basinda kus hareketsiz (E2a)
+    }
+
+    // Space'e basildiginda cagrilir.
+    // Hiz ziplama hizina AYARLANIR, eklenmez (K6). Boylece her ziplama ayni yukseklige cikar.
+    public void Zipla()
+    {
+        DikeyHiz = _ayarlar.ZiplamaHizi;
+    }
+
+    // Her karede bir kez cagrilir: once yer cekimi hizi degistirir, sonra hiz konumu degistirir.
+    public void Guncelle()
+    {
+        // 1) Yer cekimi: hiz her karede biraz daha asagi yone artar.
+        //    Math.Min: hiz MaksimumDusmeHizi'ni (12) gecemez.
+        DikeyHiz = Math.Min(DikeyHiz + _ayarlar.YerCekimi, _ayarlar.MaksimumDusmeHizi);
+
+        // 2) Konum: hiz kadar hareket et.
+        Y += DikeyHiz;
+
+        // 3) Tavan: kus ekranin ustunden cikamaz, kenarda durur (K6).
+        //    Hiz SIFIRLANMAZ (E6b): yer cekimi hizi tersine cevirene kadar kus tavanda kalir.
+        if (Y < 0f)
+        {
+            Y = 0f;
+        }
+    }
+
+    // Ekranda cizilecek dikdortgen (30x24).
+    public RectangleF Alan => new(X, Y, _ayarlar.KusGenisligi, _ayarlar.KusYuksekligi);
+
+    // Carpisma kontrolunde kullanilan kutu: cizilen alandan her kenardan 3 px kucuk (E4b).
+    // Neden? Kus GDI+ ile yuvarlak cizilecek; dikdortgenin bos koselerine degmek oyunu bitirmesin.
+    public RectangleF CarpismaKutusu
+    {
+        get
+        {
+            float pay = _ayarlar.CarpismaPayi;
+            return new RectangleF(
+                X + pay,
+                Y + pay,
+                _ayarlar.KusGenisligi - 2 * pay,
+                _ayarlar.KusYuksekligi - 2 * pay);
+        }
+    }
+}
