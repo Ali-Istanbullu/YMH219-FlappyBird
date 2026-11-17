@@ -13,23 +13,27 @@ public sealed class OyunMotoruFabrikasi : IOyunMotoruFabrikasi
 {
     private readonly OyunAyarlari _ayarlar;
     private readonly IRastgele _rastgele;
-    private readonly CarpismaDenetcisi _carpismaDenetcisi;
+    private readonly ICarpismaDenetcisi _carpismaDenetcisi;
+    private readonly IEngelUretici _engelUretici;
 
-    public OyunMotoruFabrikasi(OyunAyarlari ayarlar, IRastgele rastgele, CarpismaDenetcisi carpismaDenetcisi)
+    // K65: bagimliliklarin hepsi arayuz (ayarlar haric).
+    public OyunMotoruFabrikasi(OyunAyarlari ayarlar, IRastgele rastgele, ICarpismaDenetcisi carpismaDenetcisi, IEngelUretici engelUretici)
     {
         ArgumentNullException.ThrowIfNull(ayarlar);
         ArgumentNullException.ThrowIfNull(rastgele);
         ArgumentNullException.ThrowIfNull(carpismaDenetcisi);
+        ArgumentNullException.ThrowIfNull(engelUretici);
         _ayarlar = ayarlar;
         _rastgele = rastgele;
         _carpismaDenetcisi = carpismaDenetcisi;
+        _engelUretici = engelUretici;
     }
 
     public OyunMotoru Olustur(RekorKaydi? oncekiRekor)
     {
         return new OyunMotoru(
             new Kus(_ayarlar),
-            new EngelAlani(_ayarlar, _rastgele),
+            new EngelAlani(_ayarlar, _rastgele, _engelUretici),
             _carpismaDenetcisi,
             new HizDenetcisi(_ayarlar),
             new PuanTablosu(oncekiRekor));

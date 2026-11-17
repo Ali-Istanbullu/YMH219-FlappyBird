@@ -1,4 +1,5 @@
 using System.Drawing;
+using AliBird.Core.Abstractions;
 using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
@@ -6,7 +7,7 @@ namespace AliBird.Core.Gameplay;
 // Kusun bir seye carpip carpmadigini kontrol eder (G3, G9).
 // Tek sorumlulugu: carpisma var mi yok mu cevabini vermek. Oyunu durdurmaz;
 // sonuca gore ne yapilacagina OyunMotoru karar verir (S).
-public sealed class CarpismaDenetcisi
+public sealed class CarpismaDenetcisi : ICarpismaDenetcisi
 {
     private readonly OyunAyarlari _ayarlar;
 

@@ -1,4 +1,5 @@
 using System.Drawing;
+using AliBird.Core.Abstractions;
 using AliBird.Core.Models;
 
 namespace AliBird.Core.Gameplay;
@@ -13,14 +14,14 @@ public sealed class OyunMotoru
 {
     private readonly Kus _kus;
     private readonly EngelAlani _engelAlani;
-    private readonly CarpismaDenetcisi _carpismaDenetcisi;
+    private readonly ICarpismaDenetcisi _carpismaDenetcisi;   // K65: arayuz uzerinden
     private readonly HizDenetcisi _hizDenetcisi;
     private readonly PuanTablosu _puanTablosu;
 
     public OyunMotoru(
         Kus kus,
         EngelAlani engelAlani,
-        CarpismaDenetcisi carpismaDenetcisi,
+        ICarpismaDenetcisi carpismaDenetcisi,
         HizDenetcisi hizDenetcisi,
         PuanTablosu puanTablosu)
     {

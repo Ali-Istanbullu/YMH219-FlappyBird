@@ -13,7 +13,7 @@ public sealed class EngelAlaniTestleri
     [TestMethod]
     public void YeniAlan_UcEngeliIlkEngelXdenBaslayarakDizer()
     {
-        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100));
+        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100), new EngelUretici(_ayarlar));
 
         Assert.HasCount(3, alan.Engeller);                // 640 / 320 + 1
         Assert.AreEqual(960f, alan.Engeller[0].X);        // E5b
@@ -26,7 +26,7 @@ public sealed class EngelAlaniTestleri
     {
         var rastgele = new SahteRastgele(100);
 
-        _ = new EngelAlani(_ayarlar, rastgele);
+        _ = new EngelAlani(_ayarlar, rastgele, new EngelUretici(_ayarlar));
 
         // K7: en az 60, en cok 440 - 60 - 150 = 230 (ust sinir haric oldugu icin 231 istenir).
         Assert.AreEqual(60, rastgele.SonEnAz);
@@ -36,7 +36,7 @@ public sealed class EngelAlaniTestleri
     [TestMethod]
     public void Guncelle_EkrandanCikanEngeliEnSagdakininAraligiKadarSaginaTasir()
     {
-        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100));
+        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100), new EngelUretici(_ayarlar));
 
         // Ilk engel 960'tan basliyor; sag kenari (960 + 60) sifirin soluna gecene kadar kaydir.
         // 1025 px kaydirinca: engel0 = -65, engel1 = 255, engel2 = 575.
@@ -51,7 +51,7 @@ public sealed class EngelAlaniTestleri
     [TestMethod]
     public void YeniGecilenleriSay_GecilenEngeliBirKezSayar()
     {
-        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100));
+        var alan = new EngelAlani(_ayarlar, new SahteRastgele(100), new EngelUretici(_ayarlar));
         alan.Guncelle(900f);   // engel0: 960 - 900 = 60, sag kenari 120
 
         Assert.AreEqual(0, alan.YeniGecilenleriSay(100f));   // kus sol kenari 100 < 120: gecmedi

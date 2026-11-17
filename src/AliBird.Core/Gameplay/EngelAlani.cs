@@ -12,17 +12,22 @@ public sealed class EngelAlani
     // Bosluk yuksekligini secmek icin. Arayuz oldugu icin testte sahte sinif verilebilir (DIP).
     private readonly IRastgele _rastgele;
 
+    // Engelleri bu sinif "new"lemez; ureticiden ister (K65, R2).
+    private readonly IEngelUretici _engelUretici;
+
     private readonly List<Engel> _engeller;
 
     // Disaridan sadece okunabilir liste: baska sinif engel ekleyip silemez.
     public IReadOnlyList<Engel> Engeller => _engeller;
 
-    public EngelAlani(OyunAyarlari ayarlar, IRastgele rastgele)
+    public EngelAlani(OyunAyarlari ayarlar, IRastgele rastgele, IEngelUretici engelUretici)
     {
         ArgumentNullException.ThrowIfNull(ayarlar);
         ArgumentNullException.ThrowIfNull(rastgele);
+        ArgumentNullException.ThrowIfNull(engelUretici);
         _ayarlar = ayarlar;
         _rastgele = rastgele;
+        _engelUretici = engelUretici;
 
         // Kac engel gerekir? Ekrana sigan engel sayisi + 1 yedek.
         // 640 / 320 = 2, +1 = 3 engel. Ayarlar degisirse sayi da kendiliginden degisir.
@@ -33,7 +38,7 @@ public sealed class EngelAlani
         {
             // Ilk engel x = 960'ta (E5b), sonrakiler 320'ser piksel arayla: 960, 1280, 1600.
             float x = ayarlar.IlkEngelX + i * ayarlar.EngelAraligi;
-            _engeller.Add(new Engel(ayarlar, x, RastgeleBoslukUstY()));
+            _engeller.Add(_engelUretici.Olustur(x, RastgeleBoslukUstY()));
         }
     }
 

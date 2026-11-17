@@ -17,8 +17,8 @@ public sealed class AnaForm : Form, IOyunGorunumu
     private static readonly Size BaslangicBoyutu = new(800, 600);
     private static readonly Size EnKucukBoyut = new(480, 360);
 
-    private readonly OyunCizici _cizici;
-    private readonly OlcekHesaplayici _olcekHesaplayici;
+    private readonly IOyunCizici _cizici;                 // K65: arayuz uzerinden
+    private readonly IOlcekHesaplayici _olcekHesaplayici; // K65: arayuz uzerinden
     private readonly IHataBildirici _hataBildirici;
     private readonly SizeF _alanBoyutu;
 
@@ -34,7 +34,7 @@ public sealed class AnaForm : Form, IOyunGorunumu
     // M24 #7: cizim hatasi kullaniciya sadece BIR KEZ gosterilir.
     private bool _cizimHatasiBildirildi;
 
-    public AnaForm(OyunCizici cizici, OlcekHesaplayici olcekHesaplayici, IHataBildirici hataBildirici, OyunAyarlari ayarlar, Tema tema)
+    public AnaForm(IOyunCizici cizici, IOlcekHesaplayici olcekHesaplayici, IHataBildirici hataBildirici, OyunAyarlari ayarlar, Tema tema)
     {
         ArgumentNullException.ThrowIfNull(cizici);
         ArgumentNullException.ThrowIfNull(olcekHesaplayici);
@@ -154,7 +154,7 @@ public sealed class AnaForm : Form, IOyunGorunumu
             if (gorunsun)
             {
                 OlcekBilgisi olcek = _olcekHesaplayici.Hesapla(ClientSize, _alanBoyutu);
-                Rectangle alan = _olcekHesaplayici.SanaldanEkrana(OyunCizici.YenidenBaslatButonAlani, olcek);
+                Rectangle alan = _olcekHesaplayici.SanaldanEkrana(EkranYerlesimi.YenidenBaslatButonAlani, olcek);
                 if (_yenidenBaslatButonu.Bounds != alan)
                 {
                     _yenidenBaslatButonu.Bounds = alan;

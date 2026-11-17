@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 8c yazıldı (build/test bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 8d yazıldı (build/test bekleniyor).
 
 ---
 
@@ -203,6 +203,10 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK45 | `GenelHataYakalayici` DI'dan gelmez, çünkü DI kurulmadan önce devreye girmesi gerekir. `Program.cs` onu ilk iş olarak oluşturur, hata bildiricisini DI kurulduktan sonra `BildiriciyiAta` ile verir (method injection) | bildirildi |
 | CK46 | M24 #3: veritabanı dosyası yoksa (ilk açılış ya da kullanıcı silmiş) yeniden oluşturulur ve bu Bilgi olarak loglanır. Klasör silindiyse de dosya olmayacağı için aynı log yazılır | bildirildi |
 | CK47 | Sürüm `1.0.0`, WinForms csproj'da `<Version>` ile tanımlanır. Açılış logu `Application.ProductVersion` kullanır. .NET SDK bu değerin sonuna commit kimliğini ekleyebilir (örn. `1.0.0+abc123`) | bildirildi |
+| CK48 | `EkranYerlesimi` statik sabitler sınıfı: butonun sanal alandaki yeri tek bir yerde tanımlı, hem çizici hem form kullanıyor. Sabit değer olduğu için bağımlılık sayılmaz | bildirildi |
+| CK49 | `CizimKaynaklari` GDI+ kaynak paketi (fırça, kalem, yazı tipi). Katman çizicilerine `Tema` ve `OyunAyarlari` gibi bir ayar nesnesi olarak constructor'dan verilir (somut sınıf, arayüzsüz) | bildirildi |
+| CK50 | Çizim katmanları `IKatmanCizici` olarak DI'a kaydedilir. **Kayıt sırası çizim sırasıdır** (sahne → bilgi → durum). Yeni bir katman eklemek için mevcut kod değişmez, yeni bir sınıf yazılıp kaydedilir (O) | bildirildi |
+| CK51 | **Açık nokta:** `OyunMotoru` `Kus`, `EngelAlani`, `HizDenetcisi` ve `PuanTablosu`'nu somut sınıf olarak alıyor. Bunlar servis değil, her oyuna ait varlık nesneleri ve fabrika üretiyor. İsterse Ali'ye arayüzleri eklenir | Ali'ye soruldu |
 
 ## 4. Mimari (onaylı)
 
@@ -250,8 +254,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 7 | Infrastructure: SesUreteci, NAudioSesCalar + testler | ✅ build/test geçti, commit atıldı (81 test metodu) |
 | 8a | WinForms: Tema, OyunCizici (GDI+), OlcekHesaplayici, AnaForm, OdakAlmayanButon, FormsZamanlayici, MesajKutusuBildirici | ✅ build geçti, commit atıldı |
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
-| 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ⏳ yazıldı ve tarandı, build/test + commit bekleniyor (103 metot / 112 test) |
-| 8d | K65: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi | |
+| 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
+| 8d | K65: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi | ⏳ yazıldı, build/test bekleniyor |
 | 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |

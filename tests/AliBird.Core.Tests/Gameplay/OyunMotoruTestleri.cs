@@ -9,7 +9,7 @@ namespace AliBird.Core.Tests.Gameplay;
 public sealed class OyunMotoruTestleri
 {
     private static OyunMotoru MotorOlustur(OyunAyarlari ayarlar)
-        => new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar)).Olustur(null);
+        => new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar), new EngelUretici(ayarlar)).Olustur(null);
 
     [TestMethod]
     public void Ilerlet_KusDuserVeHizArtar()
@@ -59,7 +59,7 @@ public sealed class OyunMotoruTestleri
     public void Fabrika_HerCagrida_YeniVeTemizMotorVerir()
     {
         var ayarlar = new OyunAyarlari();
-        var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar));
+        var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar), new EngelUretici(ayarlar));
 
         OyunMotoru birinci = fabrika.Olustur(null);
         birinci.Ilerlet();

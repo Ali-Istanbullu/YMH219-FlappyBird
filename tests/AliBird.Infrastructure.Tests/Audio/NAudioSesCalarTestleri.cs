@@ -15,7 +15,7 @@ public sealed class NAudioSesCalarTestleri
     {
         var hata = new SahteHataBildirici();
 
-        var calar = new NAudioSesCalar(new HataVerenSesUreteci(), hata, new SahteGunlukcu());
+        var calar = new NAudioSesCalar(new HataVerenSesUreteci(), new DiziSesSaglayiciUretici(), hata, new SahteGunlukcu());
 
         Assert.IsFalse(calar.KullanilabilirMi);                         // sag altta "Ses yok"
         Assert.AreEqual(Gorunurluk.SadeceGunluk, hata.Bildirimler.Single().Gorunurluk);
@@ -27,7 +27,7 @@ public sealed class NAudioSesCalarTestleri
     public void KapattiktanSonra_CalVeTekrarKapat_Cokmez()
     {
         // Gercek uretici: bilgisayarda ses cihazi varsa acilir, yoksa sessiz moda gecer. Iki durumda da cokmemeli.
-        var calar = new NAudioSesCalar(new SesUreteci(), new SahteHataBildirici(), new SahteGunlukcu());
+        var calar = new NAudioSesCalar(new SesUreteci(), new DiziSesSaglayiciUretici(), new SahteHataBildirici(), new SahteGunlukcu());
 
         calar.Dispose();
 
@@ -46,5 +46,20 @@ public sealed class NAudioSesCalarTestleri
         Assert.AreEqual(1, saglayici.Read(tampon));
         Assert.AreEqual(0.3f, tampon[0]);
         Assert.AreEqual(0, saglayici.Read(tampon));   // bitti
+    }
+
+    [TestMethod]
+    public void SaglayiciUretici_HerCagridaYeniVeBastanOkunanSaglayiciVerir()
+    {
+        var uretici = new DiziSesSaglayiciUretici();
+        var bicim = WaveFormat.CreateIeeeFloatWaveFormat(44100, 1);
+        float[] ses = [0.1f, 0.2f];
+
+        ISampleProvider birinci = uretici.Olustur(ses, bicim);
+        birinci.Read(new float[2]);                    // birinci sonuna kadar okundu
+        ISampleProvider ikinci = uretici.Olustur(ses, bicim);
+
+        Assert.AreNotSame(birinci, ikinci);
+        Assert.AreEqual(2, ikinci.Read(new float[2]));  // ikinci bastan okunuyor: ayni ses ust uste calabilir
     }
 }

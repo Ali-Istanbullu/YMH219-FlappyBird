@@ -24,6 +24,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
     private const int TamponMs = 50;
 
     private readonly IHataBildirici _hataBildirici;
+    private readonly ISesSaglayiciUretici _saglayiciUretici;   // K65
     private readonly Dictionary<SesTuru, float[]> _sesler = [];
     private readonly MixingSampleProvider _karistirici;
     private readonly WaveOut? _cikis;
@@ -31,11 +32,13 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
     // volatile: ses kartinin kendi is parcacigi (thread) da bu degeri degistirebilir.
     private volatile bool _kullanilabilir;
 
-    public NAudioSesCalar(ISesUreteci uretici, IHataBildirici hataBildirici, IGunlukcu gunlukcu)
+    public NAudioSesCalar(ISesUreteci uretici, ISesSaglayiciUretici saglayiciUretici, IHataBildirici hataBildirici, IGunlukcu gunlukcu)
     {
         ArgumentNullException.ThrowIfNull(uretici);
+        ArgumentNullException.ThrowIfNull(saglayiciUretici);
         ArgumentNullException.ThrowIfNull(hataBildirici);
         ArgumentNullException.ThrowIfNull(gunlukcu);
+        _saglayiciUretici = saglayiciUretici;
         _hataBildirici = hataBildirici;
 
         // 32 bit ondalikli, tek kanal, 44100 Hz ses bicimi.
@@ -88,7 +91,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             if (_sesler.TryGetValue(tur, out float[]? ornekler))
             {
                 // Her calmada yeni bir saglayici: ayni ses ust uste binebilir.
-                _karistirici.AddMixerInput(new DiziSesSaglayici(ornekler, _karistirici.WaveFormat));
+                _karistirici.AddMixerInput(_saglayiciUretici.Olustur(ornekler, _karistirici.WaveFormat));
             }
         }
         catch (Exception hata)

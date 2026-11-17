@@ -38,7 +38,7 @@ public sealed class OyunYoneticisiTestleri
     private async Task<OyunYoneticisi> BaslatilmisYonetici(OyunAyarlari? ayarlar = null)
     {
         ayarlar ??= new OyunAyarlari();
-        var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar));
+        var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar), new EngelUretici(ayarlar));
         var yonetici = new OyunYoneticisi(
             _gorunum,
             fabrika,

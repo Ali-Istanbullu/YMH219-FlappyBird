@@ -8,7 +8,7 @@ public readonly record struct OlcekBilgisi(float Olcek, float KaydirmaX, float K
 // Boylece oyun her pencere boyutunda ayni zorlukta kalir (oyun mantigi hep 640x480'de calisir).
 //
 // Tek sorumlulugu: olcek ve kaydirma hesabi (S). Hicbir sey cizmez.
-public sealed class OlcekHesaplayici
+public sealed class OlcekHesaplayici : IOlcekHesaplayici
 {
     public OlcekBilgisi Hesapla(Size pencere, SizeF sanalAlan)
     {

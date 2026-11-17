@@ -97,7 +97,8 @@ internal static class Program
 
         // ---- Core: oyun ----
         servisler.AddSingleton(new OyunAyarlari());                                // D1b
-        servisler.AddSingleton<CarpismaDenetcisi>();                               // durum tutmaz (CK8)
+        servisler.AddSingleton<ICarpismaDenetcisi, CarpismaDenetcisi>();          // durum tutmaz (CK8, K65)
+        servisler.AddSingleton<IEngelUretici, EngelUretici>();                     // K65
         servisler.AddSingleton<IOyunMotoruFabrikasi, OyunMotoruFabrikasi>();       // her oyunda yeni motor (K19, K60)
 
         // ---- Core: servisler (K61, Adim 8c) ----
@@ -113,14 +114,21 @@ internal static class Program
         servisler.AddSingleton<IBozukVeritabaniKurtarici, BozukVeritabaniKurtarici>();   // K61
         servisler.AddSingleton<IPuanDeposu, SqlitePuanDeposu>();                   // K10
         servisler.AddSingleton<ISesUreteci, SesUreteci>();                         // K13
+        servisler.AddSingleton<ISesSaglayiciUretici, DiziSesSaglayiciUretici>();  // K65
         servisler.AddSingleton<ISesCalar, NAudioSesCalar>();
         servisler.AddSingleton<ISaat, SistemSaati>();
         servisler.AddSingleton<IRastgele, SistemRastgele>();
 
         // ---- WinForms ----
         servisler.AddSingleton(Tema.Gece());                                       // G1b
-        servisler.AddSingleton<OlcekHesaplayici>();
-        servisler.AddSingleton<OyunCizici>();
+        servisler.AddSingleton<IOlcekHesaplayici, OlcekHesaplayici>();            // K65
+        servisler.AddSingleton<CizimKaynaklari>();                                 // GDI+ kaynak paketi
+        servisler.AddSingleton<IYaziCizici, YaziCizici>();
+        // Cizim katmanlari: KAYIT SIRASI = CIZIM SIRASI (arkadan one). Yeni katman = yeni satir (O).
+        servisler.AddSingleton<IKatmanCizici, SahneCizici>();
+        servisler.AddSingleton<IKatmanCizici, BilgiCizici>();
+        servisler.AddSingleton<IKatmanCizici, DurumKatmaniCizici>();
+        servisler.AddSingleton<IOyunCizici, OyunCizici>();
         servisler.AddSingleton<IZamanlayici, FormsZamanlayici>();                  // G8
         servisler.AddSingleton<IKullaniciBildirici, MesajKutusuBildirici>();
         servisler.AddSingleton<AnaForm>();
