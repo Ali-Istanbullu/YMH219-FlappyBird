@@ -39,15 +39,18 @@ public sealed class Kus : IKus
         DikeyHiz = _ayarlar.ZiplamaHizi;
     }
 
-    // Her karede bir kez cagrilir: once yer cekimi hizi degistirir, sonra hiz konumu degistirir.
-    public void Guncelle()
+    // Her tikte bir kez cagrilir: once yer cekimi hizi degistirir, sonra hiz konumu degistirir.
+    // carpan: bu tik kac kare (1/60 sn) ediyor (K68). 60 FPS'te 1; degerler Dino ile ayni kalir.
+    public void Guncelle(float carpan)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);
+
         // 1) Yer cekimi: hiz her karede biraz daha asagi yone artar.
         //    Math.Min: hiz MaksimumDusmeHizi'ni (12) gecemez.
-        DikeyHiz = Math.Min(DikeyHiz + _ayarlar.YerCekimi, _ayarlar.MaksimumDusmeHizi);
+        DikeyHiz = Math.Min(DikeyHiz + _ayarlar.YerCekimi * carpan, _ayarlar.MaksimumDusmeHizi);
 
         // 2) Konum: hiz kadar hareket et.
-        Y += DikeyHiz;
+        Y += DikeyHiz * carpan;
 
         // 3) Tavan: kus ekranin ustunden cikamaz, kenarda durur (K6).
         //    Hiz SIFIRLANMAZ (E6b): yer cekimi hizi tersine cevirene kadar kus tavanda kalir.

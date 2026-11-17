@@ -24,8 +24,10 @@ public sealed class HizDenetcisi : IHizDenetcisi
     // Her karede bir kez cagrilir.
     // Math.Min: hiz tavani (13) asmaz. (Dino'da "if < MAX ise ekle" yaziyor ve sayi tavani
     // cok az asabiliyor; biz tam 13'te sabitliyoruz.)
-    public void KareIlerlet()
+    // carpan: bu tik kac kare ediyor (K68).
+    public void KareIlerlet(float carpan)
     {
-        Hiz = Math.Min(Hiz + _ayarlar.Ivme, _ayarlar.MaksimumHiz);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);
+        Hiz = Math.Min(Hiz + _ayarlar.Ivme * carpan, _ayarlar.MaksimumHiz);
     }
 }

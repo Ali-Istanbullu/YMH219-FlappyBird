@@ -46,6 +46,7 @@ public sealed class OyunYoneticisiTestleri
             new SesYoneticisi(_ses, _hata),
             new KareHataSayaci(_hata, ayarlar),
             new KareSuresiOlcer(new SahteKronometre()),
+            new KareCarpaniHesaplayici(ayarlar),
             _zamanlayici,
             _hata,
             _gunlukcu,

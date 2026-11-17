@@ -151,6 +151,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | K65 | 8c taramasından sonra (a): `EngelAlani` içindeki `new Engel` ve `NAudioSesCalar` içindeki `new DiziSesSaglayici` üretici arayüzlerine taşınır (`IEngelUretici`, `ISesSaglayiciUretici`). `IOyunCizici`, `IOlcekHesaplayici`, `ICarpismaDenetcisi` arayüzleri eklenir. `OyunCizici` `SahneCizici`, `BilgiCizici` ve `DurumKatmaniCizici` olarak bölünür. Ayrı bir commit olarak yapılır (8d) |
 | K66 | CK51 için (b): `OyunMotoru` tüm parçalarını arayüz olarak alır (`IKus`, `IEngelAlani`, `IHizDenetcisi`, `IPuanTablosu`). Somut sınıfları bilen tek yer fabrika. Motor sahte parçalarla da test edilir (`OyunMotoruSiraTestleri`). 8d commit'ine dahil |
 | K67 | Adım 9 ölçümü (7 oyun): 16 ms'lik zamanlayıcı ortalama 27.6–30.1 ms'de bir çalıştı (min ~15, max ~45–50 ms), yani ~33–36 FPS. Oyun hedef hızın ~%58'inde aktı. Ali (c): önce Windows zamanlayıcı çözünürlüğü 1 ms'ye çekilir (`timeBeginPeriod(1)`, kapanışta `timeEndPeriod(1)`, `WindowsZamanlayiciCozunurlugu`). Ölçüm hâlâ kötüyse zamana bağlı fizik (delta time) yapılır |
+| K68 | K67 ölçüldü, işe yaramadı: `timeBeginPeriod(1)` başarılı döndü ama ortalama aralık 28.0–28.7 ms kaldı (5 oyun, 2037 aralık). Ali (a): `timeBeginPeriod` kodu kaldırıldı. c planının 2. adımı uygulandı: **delta time**. Her tikte `çarpan = geçen ms / (1000/60)`, üst sınır 3 (`KareCarpaniHesaplayici`). Kuş (yer çekimi ve hareket), engel kayması ve hız artışı bu çarpanla çarpılır. K8 artık şöyle: hız 1/60 sn başına +0.001 artar. Dino değerleri değişmedi. Görüntü yine ~35 FPS |
 | R6 | **Uygulama hiçbir durumda çökmez** (Ali: "önemli bir nokta"). Son durak olan sınıflar (HataBildirici, SerilogGunlukcu) hiçbir exception'ı dışarı sızdırmaz. Genel yakalayıcılar Adım 8'de eklenir |
 | R7 | Her adımın sonunda Claude, Ali'ye commit komutunu verir |
 | R4 | **Önemli olan her yerde try/catch kullanılır** (Ali'nin mottosu). Çalışan kod içeren her adımda hangi noktaların try/catch ile korunduğu ayrıca gösterilir |
@@ -261,7 +262,7 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
 | 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
 | 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ✅ 118 test, commit atıldı (f5960c1, 665d98b) |
-| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ ölçüldü (~35 FPS, K67), çözünürlük düzeltmesi yazıldı, yeniden ölçüm bekleniyor |
+| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ delta time yazıldı (K68), oynanış denemesi bekleniyor |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
 | 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |

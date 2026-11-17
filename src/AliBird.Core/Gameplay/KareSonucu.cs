@@ -1,6 +1,6 @@
 namespace AliBird.Core.Gameplay;
 
-// OyunMotoru.Ilerlet() her karede bu kucuk sonucu dondurur.
+// OyunMotoru.Ilerlet(carpan) her karede bu kucuk sonucu dondurur.
 // Presenter buna bakarak hangi sesi calacagina ve oyunun bitip bitmedigine karar verir.
 // "readonly record struct": kucuk, degistirilemez, her karede olusturulsa da bellege yuk olmaz.
 //

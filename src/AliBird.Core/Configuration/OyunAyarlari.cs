@@ -62,14 +62,20 @@ public sealed record OyunAyarlari
     public float BaslangicHizi { get; init; } = 6f;
     public float MaksimumHiz { get; init; } = 13f;
 
-    // Her karede hiza eklenen artis (skora degil kareye bagli).
+    // 1 karede (1/60 sn) hiza eklenen artis (skora degil sureye bagli; K8, K68).
     public float Ivme { get; init; } = 0.001f;
 
     // ---- Oyun dongusu ve yonetim (Adim 4) ----
 
-    // Zamanlayicinin iki tik arasindaki suresi (ms). 16 ms ~ saniyede 60 kare hedefi.
-    // GECICI deger: gercek kare hizi Adim 9'da Ali'nin makinesinde olculup kesinlestirilecek.
+    // Zamanlayicinin iki tik arasindaki istenen suresi (ms). Olcum (K67): Windows'ta gercekte ~28 ms.
+    // Bu yuzden fizik tik sayisina degil gecen sureye baglidir (K68).
     public int ZamanlayiciAraligiMs { get; init; } = 16;
+
+    // Fizik degerlerinin 1 karesi (ms): 1000 / 60. Dino degerleri 60 FPS icindir (K68).
+    public float HedefKareSuresiMs { get; init; } = 1000f / 60f;
+
+    // Bir tikte en fazla kac kare ilerlenir (takilmada kus borunun icinden gecmesin, K68).
+    public float EnCokKareCarpani { get; init; } = 3f;
 
     // Game Over'dan sonra Space'in dikkate alinmadigi sure (CK2).
     // Kaynak: Chrome offline.js GAMEOVER_CLEAR_TIME: 750.

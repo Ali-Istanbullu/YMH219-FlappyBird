@@ -17,6 +17,6 @@ public interface IKus
 
     void Zipla();
 
-    // Bir karelik yer cekimi + hareket.
-    void Guncelle();
+    // carpan kare kadar yer cekimi + hareket (K68: 1 = 1/60 sn).
+    void Guncelle(float carpan);
 }

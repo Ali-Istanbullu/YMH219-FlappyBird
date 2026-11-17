@@ -28,7 +28,7 @@ public sealed class OyunMotoruSiraTestleri
     [TestMethod]
     public void Ilerlet_ParcalariDogruSiradaCagirir()
     {
-        _motor.Ilerlet();
+        _motor.Ilerlet(1f);
 
         CollectionAssert.AreEqual(new[] { "kus", "engel", "gecis", "carpisma", "hiz" }, _cagrilar);
         Assert.AreEqual(7f, _engelAlani.SonHiz);   // engeller guncel hizla kayar
@@ -39,7 +39,7 @@ public sealed class OyunMotoruSiraTestleri
     {
         _engelAlani.GecilenSayisi = 2;
 
-        KareSonucu sonuc = _motor.Ilerlet();
+        KareSonucu sonuc = _motor.Ilerlet(1f);
 
         Assert.AreEqual(2, sonuc.KazanilanPuan);
         Assert.AreEqual(2, _puan.Puan);
@@ -49,10 +49,10 @@ public sealed class OyunMotoruSiraTestleri
     public void Carpinca_MotorDururVeParcalarArtikCagrilmaz()
     {
         _carpisma.Carpti = true;
-        _motor.Ilerlet();
+        _motor.Ilerlet(1f);
         _cagrilar.Clear();
 
-        KareSonucu sonuc = _motor.Ilerlet();
+        KareSonucu sonuc = _motor.Ilerlet(1f);
         _motor.Zipla();
 
         Assert.IsTrue(_motor.BittiMi);

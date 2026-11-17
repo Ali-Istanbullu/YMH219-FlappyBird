@@ -16,7 +16,7 @@ public sealed class OyunMotoruTestleri
     {
         var motor = MotorOlustur(new OyunAyarlari());
 
-        motor.Ilerlet();
+        motor.Ilerlet(1f);
 
         Assert.AreEqual(208.6f, motor.KusAlani.Y, 0.0001f);   // yer cekimi uygulandi
         Assert.AreEqual(6.001f, motor.Hiz, 0.0001f);           // K8
@@ -28,7 +28,7 @@ public sealed class OyunMotoruTestleri
         // Ilk engeli kusun arkasina koy: x = -50, sag kenari 10 < kus 100 -> ilk karede gecilmis sayilir.
         var motor = MotorOlustur(new OyunAyarlari { IlkEngelX = -50f });
 
-        KareSonucu sonuc = motor.Ilerlet();
+        KareSonucu sonuc = motor.Ilerlet(1f);
 
         Assert.AreEqual(1, sonuc.KazanilanPuan);
         Assert.AreEqual(1, motor.Puan);
@@ -43,7 +43,7 @@ public sealed class OyunMotoruTestleri
         KareSonucu sonuc = default;
         for (int i = 0; i < 200 && !motor.BittiMi; i++)
         {
-            sonuc = motor.Ilerlet();
+            sonuc = motor.Ilerlet(1f);
         }
 
         Assert.IsTrue(motor.BittiMi);
@@ -51,7 +51,7 @@ public sealed class OyunMotoruTestleri
 
         // Bittikten sonra hicbir sey degismez.
         float y = motor.KusAlani.Y;
-        motor.Ilerlet();
+        motor.Ilerlet(1f);
         Assert.AreEqual(y, motor.KusAlani.Y);
     }
 
@@ -62,7 +62,7 @@ public sealed class OyunMotoruTestleri
         var fabrika = new OyunMotoruFabrikasi(ayarlar, new SahteRastgele(150), new CarpismaDenetcisi(ayarlar), new EngelUretici(ayarlar));
 
         OyunMotoru birinci = fabrika.Olustur(null);
-        birinci.Ilerlet();
+        birinci.Ilerlet(1f);
         OyunMotoru ikinci = fabrika.Olustur(null);
 
         Assert.AreNotSame(birinci, ikinci);

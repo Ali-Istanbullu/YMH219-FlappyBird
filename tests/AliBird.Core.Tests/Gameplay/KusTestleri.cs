@@ -24,7 +24,7 @@ public sealed class KusTestleri
     public void Zipla_DikeyHiziZiplamaHizinaAyarlar()
     {
         var kus = new Kus(_ayarlar);
-        kus.Guncelle();   // once biraz dussun (hiz +0.6 olsun)
+        kus.Guncelle(1f);   // once biraz dussun (hiz +0.6 olsun)
 
         kus.Zipla();
 
@@ -37,7 +37,7 @@ public sealed class KusTestleri
     {
         var kus = new Kus(_ayarlar);
 
-        kus.Guncelle();
+        kus.Guncelle(1f);
 
         Assert.AreEqual(0.6f, kus.DikeyHiz, 0.0001f);
         Assert.AreEqual(208.6f, kus.Y, 0.0001f);
@@ -51,7 +51,7 @@ public sealed class KusTestleri
         // 100 kare: hiz sinirsiz artsaydi 60 olurdu.
         for (int i = 0; i < 100; i++)
         {
-            kus.Guncelle();
+            kus.Guncelle(1f);
         }
 
         Assert.AreEqual(12f, kus.DikeyHiz);
@@ -65,7 +65,7 @@ public sealed class KusTestleri
         var kus = new Kus(ayarlar);
         kus.Zipla();   // hiz -12
 
-        kus.Guncelle();   // hiz -11.4, y = 5 - 11.4 = -6.4 -> 0'a sabitlenir
+        kus.Guncelle(1f);   // hiz -11.4, y = 5 - 11.4 = -6.4 -> 0'a sabitlenir
 
         Assert.AreEqual(0f, kus.Y);                       // K6: tavanda durur
         Assert.AreEqual(-11.4f, kus.DikeyHiz, 0.0001f);   // E6b: hiz sifirlanmaz

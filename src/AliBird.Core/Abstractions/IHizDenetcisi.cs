@@ -5,6 +5,6 @@ public interface IHizDenetcisi
 {
     float Hiz { get; }
 
-    // Hizi bir kare icin artirir (tavanda durur).
-    void KareIlerlet();
+    // Hizi carpan kare kadar artirir (tavanda durur, K68).
+    void KareIlerlet(float carpan);
 }

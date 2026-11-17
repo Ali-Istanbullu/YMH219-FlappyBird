@@ -22,18 +22,21 @@ public sealed class KareSuresiOlcer : IKareSuresiOlcer
         _kronometre = kronometre;
     }
 
-    public void KareGeldi()
+    public double KareGeldi()
     {
         TimeSpan simdi = _kronometre.Gecen;
+        double gecenMs = 0;
         if (_oncekiKare is TimeSpan onceki)
         {
             double ms = (simdi - onceki).TotalMilliseconds;
+            gecenMs = ms;
             _enAzMs = _aralikSayisi == 0 ? ms : Math.Min(_enAzMs, ms);
             _enCokMs = _aralikSayisi == 0 ? ms : Math.Max(_enCokMs, ms);
             _toplamMs += ms;
             _aralikSayisi++;
         }
         _oncekiKare = simdi;
+        return gecenMs;
     }
 
     public void AraVer() => _oncekiKare = null;

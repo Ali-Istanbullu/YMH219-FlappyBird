@@ -22,7 +22,7 @@ public sealed class HizDenetcisiTestleri
 
         for (int i = 0; i < 1000; i++)
         {
-            denetci.KareIlerlet();
+            denetci.KareIlerlet(1f);
         }
 
         // 6 + 1000 x 0.001 = 7. float toplama hatasi icin kucuk tolerans.
@@ -37,7 +37,7 @@ public sealed class HizDenetcisiTestleri
         // 7000 kare tavana ulasmaya yeter; 10000 ile tavanin asilmadigini da goruyoruz.
         for (int i = 0; i < 10000; i++)
         {
-            denetci.KareIlerlet();
+            denetci.KareIlerlet(1f);
         }
 
         Assert.AreEqual(13f, denetci.Hiz);

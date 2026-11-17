@@ -70,15 +70,17 @@ public sealed class OyunMotoru
     //  3) gecilen engel varsa puan artar
     //  4) carpisma kontrol edilir
     //  5) hiz bir sonraki kare icin artar (K8)
-    public KareSonucu Ilerlet()
+    // carpan: bu tik kac kare (1/60 sn) ediyor (K68, delta time). Hareket bununla carpilir.
+    public KareSonucu Ilerlet(float carpan)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);
         if (BittiMi)
         {
             return new KareSonucu(0, false);
         }
 
-        _kus.Guncelle();
-        _engelAlani.Guncelle(_hizDenetcisi.Hiz);
+        _kus.Guncelle(carpan);
+        _engelAlani.Guncelle(_hizDenetcisi.Hiz * carpan);
 
         // E3a: kusun sol kenari (X) engelin sag kenarini gecince puan.
         int kazanilanPuan = _engelAlani.YeniGecilenleriSay(_kus.X);
@@ -93,7 +95,7 @@ public sealed class OyunMotoru
             BittiMi = true;   // G3: oyun durur
         }
 
-        _hizDenetcisi.KareIlerlet();
+        _hizDenetcisi.KareIlerlet(carpan);
 
         return new KareSonucu(kazanilanPuan, carpti);
     }

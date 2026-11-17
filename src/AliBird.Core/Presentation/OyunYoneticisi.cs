@@ -16,6 +16,7 @@ namespace AliBird.Core.Presentation;
 //   - Ses kapali mi / ses calma     -> ISesYoneticisi
 //   - Ardisik kare hatasi sayimi    -> IKareHataSayaci
 //   - Kare araligi olcumu           -> IKareSuresiOlcer (Adim 9)
+//   - Sure -> kare carpani          -> IKareCarpaniHesaplayici (K68)
 //   - Fizik, carpisma, puan         -> OyunMotoru (fabrikadan)
 //
 // Butun bagimliliklar constructor'dan arayuz olarak gelir (R2, D). Container'i bilmez.
@@ -28,6 +29,7 @@ public sealed class OyunYoneticisi
     private readonly ISesYoneticisi _sesYoneticisi;
     private readonly IKareHataSayaci _kareHataSayaci;
     private readonly IKareSuresiOlcer _kareSuresiOlcer;
+    private readonly IKareCarpaniHesaplayici _kareCarpani;
     private readonly IZamanlayici _zamanlayici;
     private readonly IHataBildirici _hataBildirici;
     private readonly IGunlukcu _gunlukcu;
@@ -49,6 +51,7 @@ public sealed class OyunYoneticisi
         ISesYoneticisi sesYoneticisi,
         IKareHataSayaci kareHataSayaci,
         IKareSuresiOlcer kareSuresiOlcer,
+        IKareCarpaniHesaplayici kareCarpani,
         IZamanlayici zamanlayici,
         IHataBildirici hataBildirici,
         IGunlukcu gunlukcu,
@@ -61,6 +64,7 @@ public sealed class OyunYoneticisi
         ArgumentNullException.ThrowIfNull(sesYoneticisi);
         ArgumentNullException.ThrowIfNull(kareHataSayaci);
         ArgumentNullException.ThrowIfNull(kareSuresiOlcer);
+        ArgumentNullException.ThrowIfNull(kareCarpani);
         ArgumentNullException.ThrowIfNull(zamanlayici);
         ArgumentNullException.ThrowIfNull(hataBildirici);
         ArgumentNullException.ThrowIfNull(gunlukcu);
@@ -73,6 +77,7 @@ public sealed class OyunYoneticisi
         _sesYoneticisi = sesYoneticisi;
         _kareHataSayaci = kareHataSayaci;
         _kareSuresiOlcer = kareSuresiOlcer;
+        _kareCarpani = kareCarpani;
         _zamanlayici = zamanlayici;
         _hataBildirici = hataBildirici;
         _gunlukcu = gunlukcu;
@@ -138,8 +143,9 @@ public sealed class OyunYoneticisi
         {
             if (_durum == OyunDurumu.Calisiyor)
             {
-                _kareSuresiOlcer.KareGeldi();   // Adim 9: gercek kare araligi
-                KareSonucu sonuc = _motor.Ilerlet();
+                // K68: gercek gecen sure -> kac kare -> oyun her bilgisayarda ayni hizda akar.
+                double gecenMs = _kareSuresiOlcer.KareGeldi();
+                KareSonucu sonuc = _motor.Ilerlet(_kareCarpani.Hesapla(gecenMs));
 
                 if (sonuc.KazanilanPuan > 0)
                 {

@@ -7,8 +7,9 @@ namespace AliBird.Core.Abstractions;
 // bu yuzden aralik tahmin edilmez, olculur.
 public interface IKareSuresiOlcer
 {
-    // Oyun calisirken her karede cagrilir.
-    void KareGeldi();
+    // Oyun calisirken her karede cagrilir. Onceki kareden beri gecen ms'yi dondurur
+    // (ilk karede / AraVer'den sonra 0). K68: kare carpani buna gore hesaplanir.
+    double KareGeldi();
 
     // Duraklatma vb. araliklar olcume girmesin: bir sonraki kare yeni baslangic sayilir.
     void AraVer();

@@ -6,5 +6,5 @@ namespace AliBird.Core.Tests.Fakes;
 public sealed class SahteHizDenetcisi(List<string> cagrilar) : IHizDenetcisi
 {
     public float Hiz => 7f;
-    public void KareIlerlet() => cagrilar.Add("hiz");
+    public void KareIlerlet(float carpan) => cagrilar.Add("hiz");
 }
