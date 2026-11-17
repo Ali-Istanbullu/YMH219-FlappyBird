@@ -59,6 +59,11 @@ Name: "{autodesktop}\{#UygulamaAdi}"; Filename: "{app}\{#ExeAdi}"; Tasks: masaus
 Name: "{group}\{#UygulamaAdi}"; Filename: "{app}\{#ExeAdi}"; Tasks: baslatmenusu
 Name: "{group}\{#UygulamaAdi} Kaldır"; Filename: "{uninstallexe}"; Tasks: baslatmenusu
 
+[UninstallDelete]
+; Kaldirmada program klasoru TAMAMEN silinir (sonradan olusmus dosyalar dahil).
+; %LocalAppData%\AliBird (rekor + loglar) bilerek SILINMEZ.
+Type: filesandordirs; Name: "{app}"
+
 [Run]
 Filename: "{app}\{#ExeAdi}"; Description: "AliBird'ü başlat"; Flags: nowait postinstall skipifsilent
 
