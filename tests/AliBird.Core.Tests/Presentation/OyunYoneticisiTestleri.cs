@@ -45,6 +45,7 @@ public sealed class OyunYoneticisiTestleri
             new RekorYoneticisi(_depo, _hata, _gunlukcu, _saat),
             new SesYoneticisi(_ses, _hata),
             new KareHataSayaci(_hata, ayarlar),
+            new KareSuresiOlcer(new SahteKronometre()),
             _zamanlayici,
             _hata,
             _gunlukcu,
@@ -287,7 +288,10 @@ public sealed class OyunYoneticisiTestleri
 
         OyunBitenekadarIlerlet(yonetici);
 
-        CollectionAssert.Contains(_gunlukcu.Bilgiler, "Oyun bitti. Puan: 0");   // K63
+        // K63 + CK53: puan ve olculen kare araligi ayni satirda.
+        string? satir = _gunlukcu.Bilgiler.FirstOrDefault(m => m.StartsWith("Oyun bitti.", StringComparison.Ordinal));
+        Assert.IsNotNull(satir);
+        Assert.StartsWith("Oyun bitti. Puan: 0. Kare araligi: ort ", satir);
     }
 
     [TestMethod]

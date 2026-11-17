@@ -2,7 +2,7 @@
 
 > Bu dosya projenin tek doğru kaynağıdır. Burada yazmayan bir şey karar verilmiş sayılmaz.
 > Yeni bir konuşmaya başlarken bu dosyayı Claude'a ver. Her karar sonrası güncellenir.
-> Son güncelleme: 17.11.2026, Aşama 3, Adım 8d yazıldı (build/test bekleniyor).
+> Son güncelleme: 17.11.2026, Aşama 3, Adım 9: ölçüm yazıldı (build/test + oyun bekleniyor).
 
 ---
 
@@ -209,6 +209,7 @@ Puanlama: çalışma 40, OOP/kod düzeni/hata kontrolü 20, arayüz 10, Git 15, 
 | CK50 | Çizim katmanları `IKatmanCizici` olarak DI'a kaydedilir. **Kayıt sırası çizim sırasıdır** (sahne → bilgi → durum). Yeni bir katman eklemek için mevcut kod değişmez, yeni bir sınıf yazılıp kaydedilir (O) | bildirildi |
 | CK51 | `OyunMotoru`'nun somut varlık nesneleri (`Kus`, `EngelAlani`, `HizDenetcisi`, `PuanTablosu`) Ali'ye soruldu → K66 (b) | Ali karar verdi |
 | CK52 | K66 arayüzlerinde sadece motorun kullandığı üyeler var (I). Örn. `IKus`'ta `Y`/`DikeyHiz` yok; bunları sadece `KusTestleri` somut sınıf üzerinden kullanıyor. `IOyunMotoruFabrikasi.Olustur` somut `OyunMotoru` döndürmeye devam ediyor (presenter motorun tamamını kullanıyor, tek uygulaması var) | bildirildi |
+| CK53 | Adım 9 ölçümü: `IKareSuresiOlcer` / `KareSuresiOlcer` (Core/Services) iki kare arasındaki gerçek süreyi `IKronometre` (Stopwatch, monoton) ile ölçer. Duraklatma ve bekleme süreleri ölçüme girmez. Her oyun sonunda log satırına eklenir: `Oyun bitti. Puan: N. Kare araligi: ort X ms (min / max), N aralik, ~F FPS`. Kalıcıdır (performans sorunu olursa logdan görülür) | bildirildi |
 
 ## 4. Mimari (onaylı)
 
@@ -257,8 +258,8 @@ Her adımın sonunda Ali commit atar. Sonraki adıma Ali onay vermeden geçilmez
 | 8a | WinForms: Tema, OyunCizici (GDI+), OlcekHesaplayici, AnaForm, OdakAlmayanButon, FormsZamanlayici, MesajKutusuBildirici | ✅ build geçti, commit atıldı |
 | 8b | WinForms: Program.cs DI, tek kopya, genel hata yakalayıcılar, Form1 kaldırma, ilk çalıştırma | ✅ oyun çalıştı (Ali oynadı, rekor 8 kaydedildi), commit atıldı |
 | 8c | S düzeltmesi (K61) + loglama (K63): OyunYoneticisi, Program.cs ve SqlitePuanDeposu bölünür + testler | ✅ 112 test geçti, loglar doğrulandı, commit atıldı |
-| 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ⏳ yazıldı, build/test bekleniyor |
-| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | |
+| 8d | K65 + K66: üretici arayüzleri, somut bağımlılıklar için arayüzler, OyunCizici'nin bölünmesi, motor parçalarına arayüz | ✅ 118 test, commit atıldı (f5960c1, 665d98b) |
+| 9 | Oynanış ayarı: Timer aralığı ölçümü, fizik ve hız denemesi | ⏳ ölçüm kodu yazıldı (CK53), Ali'nin oynayıp log göndermesi bekleniyor |
 | 10 | IconGenerator + ikon (kuş silüeti, PNG + ICO) | |
 | 11 | Inno Setup + runtime indirme + temiz bilgisayarda test | |
 | 12 | README (Kod Sözlüğü, ekran görüntüleri) + LICENSE | |
@@ -286,3 +287,4 @@ Proje yolu: `C:\Projeler\YMH219-FlappyBird`
 - NAudio kodunu kurulan sürümü kontrol etmeden, hafızadaki NAudio 2 API'siyle yazdı. Kurulan sürüm 3.3.0 çıktı ve build kırıldı. Bundan sonra yeni bir paket eklenince önce kurulan sürüm ve onun API'si kaynaktan kontrol edilir.
 - M24 #3 (veritabanı ya da klasör yeniden oluşturulunca loga yazılsın) uygulanmamış, CK16 (Bilgi seviyesi loglanır) için de kodda hiç Bilgi logu yoktu. Ali logs klasörünü boş görünce ortaya çıktı. 8c'de K63 ile düzeltilecek.
 - Ali'ye "kendi sınıflarımızı `new` ile oluşturan tek yer fabrika" dedi, ama `EngelAlani` ve `NAudioSesCalar` içinde de `new` vardı. 8c taramasında ortaya çıktı. Bundan sonra böyle bir iddia taramayla doğrulanmadan söylenmez.
+- Adım 9'da log satırının biçimini değiştirdi ama o satırı birebir bekleyen testi (`OyunBitince_PuanLogaYazilir`) aramadı; test kırıldı. Bundan sonra metin değiştirirken `grep` ile testlerde de aranacak.

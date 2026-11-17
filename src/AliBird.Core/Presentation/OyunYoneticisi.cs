@@ -15,6 +15,7 @@ namespace AliBird.Core.Presentation;
 //   - Rekor okuma/kaydetme          -> IRekorYoneticisi
 //   - Ses kapali mi / ses calma     -> ISesYoneticisi
 //   - Ardisik kare hatasi sayimi    -> IKareHataSayaci
+//   - Kare araligi olcumu           -> IKareSuresiOlcer (Adim 9)
 //   - Fizik, carpisma, puan         -> OyunMotoru (fabrikadan)
 //
 // Butun bagimliliklar constructor'dan arayuz olarak gelir (R2, D). Container'i bilmez.
@@ -26,6 +27,7 @@ public sealed class OyunYoneticisi
     private readonly IRekorYoneticisi _rekorYoneticisi;
     private readonly ISesYoneticisi _sesYoneticisi;
     private readonly IKareHataSayaci _kareHataSayaci;
+    private readonly IKareSuresiOlcer _kareSuresiOlcer;
     private readonly IZamanlayici _zamanlayici;
     private readonly IHataBildirici _hataBildirici;
     private readonly IGunlukcu _gunlukcu;
@@ -46,6 +48,7 @@ public sealed class OyunYoneticisi
         IRekorYoneticisi rekorYoneticisi,
         ISesYoneticisi sesYoneticisi,
         IKareHataSayaci kareHataSayaci,
+        IKareSuresiOlcer kareSuresiOlcer,
         IZamanlayici zamanlayici,
         IHataBildirici hataBildirici,
         IGunlukcu gunlukcu,
@@ -57,6 +60,7 @@ public sealed class OyunYoneticisi
         ArgumentNullException.ThrowIfNull(rekorYoneticisi);
         ArgumentNullException.ThrowIfNull(sesYoneticisi);
         ArgumentNullException.ThrowIfNull(kareHataSayaci);
+        ArgumentNullException.ThrowIfNull(kareSuresiOlcer);
         ArgumentNullException.ThrowIfNull(zamanlayici);
         ArgumentNullException.ThrowIfNull(hataBildirici);
         ArgumentNullException.ThrowIfNull(gunlukcu);
@@ -68,6 +72,7 @@ public sealed class OyunYoneticisi
         _rekorYoneticisi = rekorYoneticisi;
         _sesYoneticisi = sesYoneticisi;
         _kareHataSayaci = kareHataSayaci;
+        _kareSuresiOlcer = kareSuresiOlcer;
         _zamanlayici = zamanlayici;
         _hataBildirici = hataBildirici;
         _gunlukcu = gunlukcu;
@@ -133,6 +138,7 @@ public sealed class OyunYoneticisi
         {
             if (_durum == OyunDurumu.Calisiyor)
             {
+                _kareSuresiOlcer.KareGeldi();   // Adim 9: gercek kare araligi
                 KareSonucu sonuc = _motor.Ilerlet();
 
                 if (sonuc.KazanilanPuan > 0)
@@ -144,6 +150,11 @@ public sealed class OyunYoneticisi
                 {
                     OyunuBitir();
                 }
+            }
+            else
+            {
+                // Hazir / Duraklatildi / OyunBitti: bekleme suresi olcume girmesin.
+                _kareSuresiOlcer.AraVer();
             }
 
             GoruntuyuGonder();
@@ -170,7 +181,11 @@ public sealed class OyunYoneticisi
         _sesYoneticisi.Cal(SesTuru.Carpma);
         _sesYoneticisi.Cal(SesTuru.OyunBitti);
 
-        _gunlukcu.Bilgi($"Oyun bitti. Puan: {_motor.Puan}");   // K63
+        // K63 + CK53: puan ve bu oyunda olculen gercek kare araligi.
+        KareOlcumu? olcum = _kareSuresiOlcer.Ozet();
+        _gunlukcu.Bilgi(olcum is null
+            ? $"Oyun bitti. Puan: {_motor.Puan}"
+            : $"Oyun bitti. Puan: {_motor.Puan}. Kare araligi: {olcum}");
 
         // K52: rekor oyun bitince kaydedilir (gerekiyorsa, arka planda).
         _rekorYoneticisi.GerekirseKaydet(_motor.KaydedilecekRekorVarMi, _motor.Puan);
@@ -183,6 +198,7 @@ public sealed class OyunYoneticisi
         _durum = OyunDurumu.Hazir;
         _rekorYoneticisi.YeniOyunBasladi();
         _kareHataSayaci.Sifirla();
+        _kareSuresiOlcer.Sifirla();
     }
 
     // ================= TUSLAR (CK1) =================

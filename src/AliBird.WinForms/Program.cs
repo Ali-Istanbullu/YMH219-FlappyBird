@@ -105,6 +105,7 @@ internal static class Program
         servisler.AddSingleton<IRekorYoneticisi, RekorYoneticisi>();
         servisler.AddSingleton<ISesYoneticisi, SesYoneticisi>();
         servisler.AddSingleton<IKareHataSayaci, KareHataSayaci>();
+        servisler.AddSingleton<IKareSuresiOlcer, KareSuresiOlcer>();               // Adim 9, CK53
         servisler.AddSingleton<OyunYoneticisi>();                                  // presenter
 
         // ---- Infrastructure ----
@@ -117,6 +118,7 @@ internal static class Program
         servisler.AddSingleton<ISesSaglayiciUretici, DiziSesSaglayiciUretici>();  // K65
         servisler.AddSingleton<ISesCalar, NAudioSesCalar>();
         servisler.AddSingleton<ISaat, SistemSaati>();
+        servisler.AddSingleton<IKronometre, SistemKronometresi>();                 // CK53: monoton sayac
         servisler.AddSingleton<IRastgele, SistemRastgele>();
 
         // ---- WinForms ----
