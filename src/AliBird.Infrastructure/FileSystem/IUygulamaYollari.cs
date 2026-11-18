@@ -5,10 +5,10 @@ namespace AliBird.Infrastructure.FileSystem;
 // Core bu arayuzu bilmez; sadece Infrastructure siniflari (log, veritabani) kullanir.
 public interface IUygulamaYollari
 {
-    // %LocalAppData%\AliBird\data  (yoksa olusturulur)
+    // %LocalAppData%\AliBird\data (yoksa olusturulur)
     string VeriKlasoru();
 
-    // %LocalAppData%\AliBird\logs  (yoksa olusturulur)
+    // %LocalAppData%\AliBird\logs (yoksa olusturulur)
     string GunlukKlasoru();
 
     // data\alibird.db

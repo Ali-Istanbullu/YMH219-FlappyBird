@@ -3,7 +3,7 @@ using AliBird.Infrastructure.Audio;
 
 namespace AliBird.Infrastructure.Tests.Audio;
 
-// Uretilen seslerin suresini, ses seviyesini ve yumusak baslayip bittigini dogrular (K13, S1b, S2a).
+// Uretilen seslerin suresini, ses seviyesini ve yumusak baslayip bittigini dogrular.
 [TestClass]
 public sealed class SesUreteciTestleri
 {
@@ -33,7 +33,7 @@ public sealed class SesUreteciTestleri
     {
         float enYuksek = _uretici.Uret(tur).Select(o => Math.Abs(o)).Max();
 
-        Assert.IsLessThanOrEqualTo(0.3f + 0.0001f, enYuksek);   // S2a
+        Assert.IsLessThanOrEqualTo(0.3f + 0.0001f, enYuksek);
         Assert.IsGreaterThan(0.1f, enYuksek);                   // ama gercekten ses var
     }
 

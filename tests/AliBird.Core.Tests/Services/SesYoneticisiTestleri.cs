@@ -4,7 +4,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Services;
 
-// Ses kapali/acik karari, gosterge durumu ve cokmeme (D4b, K12, K13, CK5, R6).
+// Ses kapali/acik karari, gosterge durumu ve cokmeme.
 [TestClass]
 public sealed class SesYoneticisiTestleri
 {
@@ -12,7 +12,7 @@ public sealed class SesYoneticisiTestleri
     public void Acikken_SesCalinir()
     {
         var calar = new SahteSesCalar();
-        var yonetici = new SesYoneticisi(calar, new SahteHataBildirici());
+        var yonetici = new SesYoneticisi(calar);
 
         yonetici.Cal(SesTuru.Puan);
 
@@ -24,19 +24,19 @@ public sealed class SesYoneticisiTestleri
     public void SessizlikAcikken_SesCaliciyaHicGidilmez()
     {
         var calar = new SahteSesCalar();
-        var yonetici = new SesYoneticisi(calar, new SahteHataBildirici());
+        var yonetici = new SesYoneticisi(calar);
 
         yonetici.SessizligiDegistir();
         yonetici.Cal(SesTuru.Zipla);
 
-        Assert.IsEmpty(calar.CalinanSesler);              // D4b
-        Assert.AreEqual(SesDurumu.Kapali, yonetici.Durum); // K12: gri "Ses kapali (M)"
+        Assert.IsEmpty(calar.CalinanSesler);
+        Assert.AreEqual(SesDurumu.Kapali, yonetici.Durum); // gri "Ses kapali (M)"
     }
 
     [TestMethod]
     public void IkinciM_SesiGeriAcar()
     {
-        var yonetici = new SesYoneticisi(new SahteSesCalar(), new SahteHataBildirici());
+        var yonetici = new SesYoneticisi(new SahteSesCalar());
 
         yonetici.SessizligiDegistir();
         yonetici.SessizligiDegistir();
@@ -48,11 +48,11 @@ public sealed class SesYoneticisiTestleri
     public void CihazYoksa_GostergeYokOlurVeSesCalinmaz()
     {
         var calar = new SahteSesCalar { KullanilabilirMi = false };
-        var yonetici = new SesYoneticisi(calar, new SahteHataBildirici());
+        var yonetici = new SesYoneticisi(calar);
 
         yonetici.Cal(SesTuru.Puan);
 
         Assert.IsEmpty(calar.CalinanSesler);
-        Assert.AreEqual(SesDurumu.Yok, yonetici.Durum);    // K12: kirmizi "Ses yok"
+        Assert.AreEqual(SesDurumu.Yok, yonetici.Durum);    // kirmizi "Ses yok"
     }
 }

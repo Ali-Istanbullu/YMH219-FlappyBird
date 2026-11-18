@@ -8,7 +8,7 @@ namespace AliBird.WinForms.Rendering;
 //  Dispose edilmezse bellek sizar. Bu yuzden hepsi BIR KEZ, burada olusturulur ve
 //  uygulama kapanirken burada birakilir.
 //
-//  Tek sorumlulugu: cizim kaynaklarini Tema'dan uretmek, tutmak ve birakmak (S).
+//  Tek sorumlulugu: cizim kaynaklarini Tema'dan uretmek, tutmak ve birakmak.
 //  Hicbir sey cizmez. Katman cizicileri bu paketi Tema/OyunAyarlari gibi bir "ayar nesnesi"
 //  olarak constructor'dan alir.
 // ================================================================================
@@ -59,7 +59,7 @@ public sealed class CizimKaynaklari : IDisposable
     public Pen ZeminCizgi { get; }
     public Pen KusKenar { get; }
 
-    // ---- Yazi tipleri (CK31: Segoe UI, piksel cinsinden; olcekle birlikte buyur/kuculur) ----
+    // ---- Yazi tipleri (Segoe UI, piksel cinsinden; olcekle birlikte buyur/kuculur) ----
     public Font BuyukYazi { get; } = new("Segoe UI", 36f, FontStyle.Bold, GraphicsUnit.Pixel);
     public Font OrtaYazi { get; } = new("Segoe UI", 18f, FontStyle.Bold, GraphicsUnit.Pixel);
     public Font KucukYazi { get; } = new("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -78,14 +78,7 @@ public sealed class CizimKaynaklari : IDisposable
             BuyukYazi, OrtaYazi, KucukYazi, Ortala, SagaYasla
         })
         {
-            try
-            {
-                kaynak.Dispose();
-            }
-            catch
-            {
-                // R6: kapanista bile exception disari cikmaz.
-            }
+            kaynak.Dispose();
         }
     }
 }

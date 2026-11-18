@@ -1,12 +1,12 @@
 ﻿; ================================================================================
-;  AliBird kurulum betigi (Inno Setup) - Adim 11, K18, R3
+;  AliBird kurulum betigi (Inno Setup)
 ;
 ;  Once uygulamayi yayinla (repo kokunden):
 ;    dotnet publish src/AliBird.WinForms -c Release -r win-x64 --self-contained false -o publish/AliBird
 ;  Sonra bu dosyayi Inno Setup ile derle (ISCC.exe installer\AliBird.iss).
-;  Cikti: installer\Output\AliBird-Kurulum-1.0.0.exe  (repoya girmez, GitHub Releases'e yuklenir, K1)
+;  Cikti: installer\Output\AliBird-Kurulum-1.0.0.exe (repoya girmez, GitHub Releases'e yuklenir)
 ;
-;  Requirement (R3): .NET 10 Desktop Runtime (x64) pakete GOMULMEZ (kurulum kucuk kalir).
+;  Requirement: .NET 10 Desktop Runtime (x64) pakete GOMULMEZ (kurulum kucuk kalir).
 ;  Kurulum runtime'i kontrol eder; yoksa Microsoft'tan indirir ve sessizce kurar.
 ;  Indirme ya da kurulum basarisiz olursa hata gosterilir ve kurulum ilerlemez.
 ; ================================================================================
@@ -26,11 +26,11 @@ AppId={{0446C720-E1C9-4AB8-8982-CDF17EAA94B9}
 AppName={#UygulamaAdi}
 AppVersion={#UygulamaSurumu}
 AppPublisher={#Yayinci}
-; K18: Program Files\AliBird, yonetici yetkisi gerekir
+; Program Files\AliBird, yonetici yetkisi gerekir
 DefaultDirName={autopf}\{#UygulamaAdi}
 DefaultGroupName={#UygulamaAdi}
 PrivilegesRequired=admin
-; K2: sadece Windows x64
+; sadece Windows x64
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=Output
@@ -41,18 +41,18 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 ; Kaldirma AppData'ya (%LocalAppData%\AliBird) DOKUNMAZ: rekor ve loglar kalir,
-; yeniden kurulunca rekor geri gelir (Ali'nin istegi).
+; yeniden kurulunca rekor geri gelir.
 
 [Languages]
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Tasks]
-; K18: kisayollar istege bagli
+; kisayollar istege bagli
 Name: "masaustu"; Description: "Masaüstüne kısayol oluştur"; GroupDescription: "Kısayollar:"
 Name: "baslatmenusu"; Description: "Başlat menüsüne kısayol oluştur"; GroupDescription: "Kısayollar:"
 
 [Files]
-; .pdb (hata ayiklama sembolleri) kullaniciya gerekmez, kurulum kucuk kalsin (CK59)
+; .pdb (hata ayiklama sembolleri) kullaniciya gerekmez, kurulum kucuk kalsin
 Source: "{#YayinKlasoru}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
@@ -123,7 +123,7 @@ begin
   end;
 end;
 
-// "Kur" dugmesine basilinca: runtime yoksa indir + kur. Hata olursa kurulum ilerlemez (K18).
+// "Kur" dugmesine basilinca: runtime yoksa indir + kur. Hata olursa kurulum ilerlemez.
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
   Hata: String;

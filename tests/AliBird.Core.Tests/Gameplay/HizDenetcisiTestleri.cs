@@ -3,7 +3,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Hiz egrisini dogrular (K8: 6 -> 13, kare basina +0.001).
+// Hiz egrisini dogrular (6 -> 13, kare basina +0.001).
 [TestClass]
 public sealed class HizDenetcisiTestleri
 {

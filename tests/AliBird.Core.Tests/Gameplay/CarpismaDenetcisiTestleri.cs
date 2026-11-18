@@ -4,7 +4,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Zemin ve engel carpismalarini dogrular (G3, E4).
+// Zemin ve engel carpismalarini dogrular.
 [TestClass]
 public sealed class CarpismaDenetcisiTestleri
 {
@@ -57,7 +57,7 @@ public sealed class CarpismaDenetcisiTestleri
     [TestMethod]
     public void KucukKutu_GorselKoseDegseBileCarpmaz()
     {
-        // E4b: kus cizimde boruya 2 px degiyor ama carpisma kutusu 3 px iceride.
+        // kus cizimde boruya 2 px degiyor ama carpisma kutusu 3 px iceride.
         var ayarlar = new OyunAyarlari { KusBaslangicY = 100f - 3f + 1f, KusX = 110f }; // cizim ust kenari 98
         var kus = new Kus(ayarlar);
 

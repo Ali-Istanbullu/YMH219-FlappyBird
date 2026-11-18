@@ -1,7 +1,7 @@
 namespace AliBird.WinForms.Rendering;
 
-// Kus: elips govde + kanat + goz + ucgen gaga. Olculer govdeye oranla verilir (K4: tamamen GDI+).
-// Tek sorumlulugu: kusu cizmek (S). SahneCizici'den Adim 10'da ayrildi (CK55).
+// Kus: elips govde + kanat + goz + ucgen gaga. Olculer govdeye oranla verilir (tamamen GDI+).
+// Tek sorumlulugu: kusu cizmek.
 public sealed class KusCizici : IKusCizici
 {
     // Gaganin govdenin sagindan disari tasma orani (ikon yerlesimi de bunu kullanir).

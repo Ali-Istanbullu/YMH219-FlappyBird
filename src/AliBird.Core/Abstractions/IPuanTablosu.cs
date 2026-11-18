@@ -1,6 +1,6 @@
 namespace AliBird.Core.Abstractions;
 
-// Bu oyunun puaninin OyunMotoru'na gorunen yuzu (K66, K9, K10).
+// Bu oyunun puaninin OyunMotoru'na gorunen yuzu.
 public interface IPuanTablosu
 {
     int Puan { get; }

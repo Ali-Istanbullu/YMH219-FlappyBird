@@ -1,22 +1,28 @@
 using AliBird.Core.Abstractions;
+using AliBird.Core.Errors;
 using AliBird.Core.Models;
 
 namespace AliBird.Core.Tests.Fakes;
 
 // Veritabani yerine bellekte calisan sahte depo.
-// Istenirse okuma/kaydetme hata firlatir (M24 #1, #2 senaryolari).
+// Istenirse beklenen depo hatasi (PuanDeposuHatasi) ya da kod hatasi (bug) firlatir.
 public sealed class SahtePuanDeposu : IPuanDeposu
 {
     public RekorKaydi? KayitliRekor { get; set; }
     public bool OkumaHataFirlatsin { get; set; }
     public bool KaydetmeHataFirlatsin { get; set; }
+    public bool OkumadaBugOlsun { get; set; }
     public int KaydetmeSayisi { get; private set; }
 
     public Task<RekorKaydi?> RekoruOkuAsync(CancellationToken iptal = default)
     {
+        if (OkumadaBugOlsun)
+        {
+            throw new InvalidOperationException("Sahte bug");
+        }
         if (OkumaHataFirlatsin)
         {
-            throw new IOException("Sahte okuma hatasi");
+            throw new PuanDeposuHatasi("Sahte okuma hatasi", new IOException("disk"));
         }
         return Task.FromResult(KayitliRekor);
     }
@@ -26,7 +32,7 @@ public sealed class SahtePuanDeposu : IPuanDeposu
         KaydetmeSayisi++;
         if (KaydetmeHataFirlatsin)
         {
-            throw new IOException("Sahte kaydetme hatasi");
+            throw new PuanDeposuHatasi("Sahte kaydetme hatasi", new IOException("disk"));
         }
         KayitliRekor = rekor;
         return Task.CompletedTask;

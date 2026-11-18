@@ -3,7 +3,7 @@ using AliBird.Infrastructure.Tests.Fakes;
 
 namespace AliBird.Infrastructure.Tests.FileSystem;
 
-// Klasor ve dosya yollarini ve "silinirse yeniden olustur" kuralini dogrular (K16, N7).
+// Klasor ve dosya yollarini ve "silinirse yeniden olustur" kuralini dogrular.
 [TestClass]
 public sealed class UygulamaYollariTestleri
 {
@@ -38,7 +38,7 @@ public sealed class UygulamaYollariTestleri
         Directory.Delete(gunluk, recursive: true);   // kullanici sildi
         yollar.GunlukKlasoru();
 
-        Assert.IsTrue(Directory.Exists(gunluk));      // K16
+        Assert.IsTrue(Directory.Exists(gunluk));
     }
 
     [TestMethod]
@@ -47,6 +47,6 @@ public sealed class UygulamaYollariTestleri
         string beklenen = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AliBird");
 
-        Assert.AreEqual(beklenen, UygulamaYollari.VarsayilanKokKlasor());   // M4a
+        Assert.AreEqual(beklenen, UygulamaYollari.VarsayilanKokKlasor());
     }
 }

@@ -5,7 +5,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// K68: hareket kare sayisina degil gecen sureye bagli (carpan = kac kare, 1 kare = 1/60 sn).
+// hareket kare sayisina degil gecen sureye bagli (carpan = kac kare, 1 kare = 1/60 sn).
 [TestClass]
 public sealed class DeltaZamanTestleri
 {

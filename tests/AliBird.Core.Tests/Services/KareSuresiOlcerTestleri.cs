@@ -4,7 +4,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Services;
 
-// Kare araligi olcumunu dogrular (Adim 9, CK53).
+// Kare araligi olcumunu dogrular.
 [TestClass]
 public sealed class KareSuresiOlcerTestleri
 {

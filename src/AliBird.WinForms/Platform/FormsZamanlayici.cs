@@ -2,10 +2,10 @@ using AliBird.Core.Abstractions;
 
 namespace AliBird.WinForms.Platform;
 
-// IZamanlayici'nin WinForms uygulamasi (G8: PDF Timer istiyor, M16a).
+// IZamanlayici'nin WinForms uygulamasi (PDF Timer istiyor).
 // Icinde System.Windows.Forms.Timer calisir: tiklari arayuzun (UI) is parcaciginda uretir,
 // bu yuzden presenter ve form ayni is parcaciginda calisir, kilit gerekmez.
-// Tek sorumlulugu: WinForms Timer'ini Core'un anladigi arayuze baglamak (S, DIP).
+// Tek sorumlulugu: WinForms Timer'ini Core'un anladigi arayuze baglamak (DIP).
 public sealed class FormsZamanlayici : IZamanlayici, IDisposable
 {
     // WinForms'un kendi zamanlayicisi; bu sinifin tek isi onu sarmak.
@@ -22,7 +22,7 @@ public sealed class FormsZamanlayici : IZamanlayici, IDisposable
     public int AralikMs
     {
         get => _timer.Interval;
-        // Timer 0 ve eksi degeri kabul etmez (exception verir); en az 1 ms (R6).
+        // Timer 0 ve eksi degeri kabul etmez (exception verir); en az 1 ms.
         set => _timer.Interval = Math.Max(1, value);
     }
 
@@ -32,14 +32,7 @@ public sealed class FormsZamanlayici : IZamanlayici, IDisposable
 
     public void Dispose()
     {
-        try
-        {
-            _timer.Stop();
-            _timer.Dispose();
-        }
-        catch
-        {
-            // R6: kapanista bile exception disari cikmaz.
-        }
+        _timer.Stop();
+        _timer.Dispose();
     }
 }

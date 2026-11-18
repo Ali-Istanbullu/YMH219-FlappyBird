@@ -2,8 +2,8 @@ using AliBird.Core.Models;
 
 namespace AliBird.Infrastructure.Audio;
 
-// Sesleri KODLA ureten sozlesme (K13: harici ses dosyasi yok).
-// Neden arayuz? NAudioSesCalar ureticiyi "new"lemesin (R2) ve testte hata veren
+// Sesleri KODLA ureten sozlesme (harici ses dosyasi yok).
+// Neden arayuz? NAudioSesCalar ureticiyi "new"lemesin ve testte hata veren
 // sahte bir uretici verilebilsin (DIP).
 public interface ISesUreteci
 {

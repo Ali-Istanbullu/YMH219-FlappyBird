@@ -1,6 +1,6 @@
 namespace AliBird.Core.Models;
 
-// Sag alt kosedeki ses gostergesinin ne yazacagini belirler (K12).
+// Sag alt kosedeki ses gostergesinin ne yazacagini belirler.
 public enum SesDurumu
 {
     // Ses calisiyor: gosterge bos kalir.

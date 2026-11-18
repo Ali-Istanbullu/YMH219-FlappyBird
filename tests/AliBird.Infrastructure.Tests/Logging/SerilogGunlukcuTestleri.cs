@@ -4,7 +4,7 @@ using AliBird.Infrastructure.Tests.Fakes;
 
 namespace AliBird.Infrastructure.Tests.Logging;
 
-// Log dosyasinin bicimini, boyut sinirini ve "asla cokme" kuralini dogrular (K14, K15, R6, M24 #5).
+// Log dosyasinin bicimini, boyut sinirini ve "asla cokme" kuralini dogrular.
 [TestClass]
 public sealed class SerilogGunlukcuTestleri
 {
@@ -24,7 +24,7 @@ public sealed class SerilogGunlukcuTestleri
         StringAssert.Contains(icerik, "[ERR]");
         StringAssert.Contains(icerik, "Rekor kaydedilemedi {test}");   // { } aynen yazildi
         StringAssert.Contains(icerik, "ic ayrinti");                   // hata ayrintisi
-        StringAssert.Matches(icerik, new System.Text.RegularExpressions.Regex(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"));   // K14: tarih-saat
+        StringAssert.Matches(icerik, new System.Text.RegularExpressions.Regex(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"));   // tarih-saat
     }
 
     [TestMethod]
@@ -46,7 +46,7 @@ public sealed class SerilogGunlukcuTestleri
         string[] dosyalar = Directory.GetFiles(yollar.GunlukKlasoru());
         long toplam = dosyalar.Sum(d => new FileInfo(d).Length);
 
-        Assert.IsLessThanOrEqualTo(5, dosyalar.Length);                      // K15: en fazla 5 dosya
+        Assert.IsLessThanOrEqualTo(5, dosyalar.Length);                      // en fazla 5 dosya
         Assert.IsLessThanOrEqualTo(5L * 1024 * 1024 + 64 * 1024, toplam);   // ~5 MB (+ son satir payi)
     }
 
@@ -58,7 +58,7 @@ public sealed class SerilogGunlukcuTestleri
         File.WriteAllText(Path.Combine(kok.Yol, "logs"), "engel");
         var yollar = new UygulamaYollari(kok.Yol);
 
-        // Hicbiri exception firlatmamali (R6, M24 #5, CK19).
+        // Hicbiri exception firlatmamali.
         var gunlukcu = new SerilogGunlukcu(yollar);
         gunlukcu.Bilgi("yazilamayacak");
         gunlukcu.Hata(new Exception("x"), "yazilamayacak");

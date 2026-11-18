@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 
 namespace AliBird.Infrastructure.Tests.Persistence;
 
-// Bozuk dosyanin taninmasi ve kenara alinmasi (M24 #4, CK23, K63, R6).
+// Bozuk dosyanin taninmasi ve kenara alinmasi.
 [TestClass]
 public sealed class BozukVeritabaniKurtariciTestleri
 {
@@ -53,15 +53,15 @@ public sealed class BozukVeritabaniKurtariciTestleri
         _kurtarici.KenaraAl(new FormatException("bozuk tarih"));
 
         Assert.IsFalse(File.Exists(dosya));
-        Assert.HasCount(1, Directory.GetFiles(_yollar.VeriKlasoru(), "alibird.corrupt-*.db"));   // CK23
-        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("kenara alındı")));                  // K63
-        Assert.AreEqual(Gorunurluk.EkranVeGunluk, _hata.Bildirimler.Single().Gorunurluk);         // M24 #4
+        Assert.HasCount(1, Directory.GetFiles(_yollar.VeriKlasoru(), "alibird.corrupt-*.db"));
+        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("kenara alındı")));
+        Assert.AreEqual(Gorunurluk.EkranVeGunluk, _hata.Bildirimler.Single().Gorunurluk);
     }
 
     [TestMethod]
     public void DosyaYokken_CokmezSadeceBildirir()
     {
-        _kurtarici.KenaraAl(new FormatException("x"));   // R6: exception yok
+        _kurtarici.KenaraAl(new FormatException("x"));   // exception yok
 
         Assert.AreEqual(1, _hata.EkranaGidenSayisi);
     }

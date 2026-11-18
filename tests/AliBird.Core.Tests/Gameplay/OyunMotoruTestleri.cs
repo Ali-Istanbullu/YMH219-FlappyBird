@@ -19,7 +19,7 @@ public sealed class OyunMotoruTestleri
         motor.Ilerlet(1f);
 
         Assert.AreEqual(208.6f, motor.KusAlani.Y, 0.0001f);   // yer cekimi uygulandi
-        Assert.AreEqual(6.001f, motor.Hiz, 0.0001f);           // K8
+        Assert.AreEqual(6.001f, motor.Hiz, 0.0001f);
     }
 
     [TestMethod]

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Adim 10: AliBird ikonunu (PNG + ICO) oyundaki kus cizimiyle uretir. Oyunun parcasi degildir, bir aractir. -->
+  <!-- AliBird ikonunu (PNG + ICO) oyundaki kus cizimiyle uretir. Oyunun parcasi degildir, bir aractir. -->
   <ItemGroup>
     <ProjectReference Include="..\AliBird.WinForms\AliBird.WinForms.csproj" />
   </ItemGroup>

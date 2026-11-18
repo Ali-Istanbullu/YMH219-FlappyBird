@@ -3,24 +3,24 @@ using AliBird.Core.Models;
 namespace AliBird.Infrastructure.Audio;
 
 // ================================================================================
-//  SES URETIMI (K13: sesler kodla uretilir ve kodda ISARETLENIR)
+//  SES URETIMI (sesler kodla uretilir ve kodda ISARETLENIR)
 //
 //  Ses = havadaki titresim. Bilgisayarda bunu saniyede 44100 kez olculmus sayilarla
-//  (ornek / sample) temsil ederiz. Her ornek -1 ile 1 arasinda bir sayidir.
+// (ornek / sample) temsil ederiz. Her ornek -1 ile 1 arasinda bir sayidir.
 //
-//  Bu sinif dort sesi matematikle uretir; hepsi SINUS dalgasidir (yumusak ton, S1b):
+//  Bu sinif dort sesi matematikle uretir; hepsi SINUS dalgasidir (yumusak ton):
 //      ornek = sin(2 * PI * frekans * zaman) * genlik
 //  - frekans (Hz): sesin inceligi. 220 kalin, 1320 ince.
-//  - genlik      : sesin yuksekligi. 0.3 = %30 (Ali, Adim 7 S2a).
+//  - genlik      : sesin yuksekligi. 0.3 = %30.
 //
-//  Tek sorumlulugu: sayi dizisi uretmek (S). Ses kartini hic bilmez; calma isi NAudioSesCalar'in.
+//  Tek sorumlulugu: sayi dizisi uretmek. Ses kartini hic bilmez; calma isi NAudioSesCalar'in.
 // ================================================================================
 public sealed class SesUreteci : ISesUreteci
 {
     // CD kalitesi: saniyede 44100 ornek.
     private const int Hiz = 44100;
 
-    // Ses seviyesi %30 (Ali, Adim 7 S2a).
+    // Ses seviyesi %30.
     private const float Genlik = 0.3f;
 
     // Her notanin basinda ve sonunda 5 ms'lik yumusak gecis.

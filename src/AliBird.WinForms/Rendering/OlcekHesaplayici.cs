@@ -3,11 +3,11 @@ namespace AliBird.WinForms.Rendering;
 // Olcekleme sonucu: sanal alani pencereye sigdirmak icin ne kadar buyutup nereye kaydiracagimiz.
 public readonly record struct OlcekBilgisi(float Olcek, float KaydirmaX, float KaydirmaY);
 
-// 640x480'lik SANAL oyun alanini, oran bozulmadan pencereye sigdirir (K5, K7).
+// 640x480'lik SANAL oyun alanini, oran bozulmadan pencereye sigdirir.
 // Pencere daha genisse sagda-solda, daha uzunsa altta-ustte bos kenar kalir.
 // Boylece oyun her pencere boyutunda ayni zorlukta kalir (oyun mantigi hep 640x480'de calisir).
 //
-// Tek sorumlulugu: olcek ve kaydirma hesabi (S). Hicbir sey cizmez.
+// Tek sorumlulugu: olcek ve kaydirma hesabi. Hicbir sey cizmez.
 public sealed class OlcekHesaplayici : IOlcekHesaplayici
 {
     public OlcekBilgisi Hesapla(Size pencere, SizeF sanalAlan)

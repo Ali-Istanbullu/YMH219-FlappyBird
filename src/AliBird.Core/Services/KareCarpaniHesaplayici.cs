@@ -3,8 +3,8 @@ using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Services;
 
-// IKareCarpaniHesaplayici'nin uygulamasi (K68).
-// Tek sorumlulugu: ms -> kare carpani donusumu ve ust sinir (S).
+// IKareCarpaniHesaplayici'nin uygulamasi.
+// Tek sorumlulugu: ms -> kare carpani donusumu ve ust sinir.
 public sealed class KareCarpaniHesaplayici : IKareCarpaniHesaplayici
 {
     private readonly float _hedefKareMs;

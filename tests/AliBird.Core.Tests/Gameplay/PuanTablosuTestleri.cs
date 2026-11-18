@@ -3,7 +3,7 @@ using AliBird.Core.Models;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Puan ve rekor kurallarini dogrular (K9, K10, E7).
+// Puan ve rekor kurallarini dogrular.
 [TestClass]
 public sealed class PuanTablosuTestleri
 {
@@ -15,7 +15,7 @@ public sealed class PuanTablosuTestleri
         var tablo = new PuanTablosu(oncekiRekor: null);
         tablo.PuanEkle(5);
 
-        Assert.IsFalse(tablo.YeniRekorMu);             // E7.1b
+        Assert.IsFalse(tablo.YeniRekorMu);
         Assert.IsTrue(tablo.KaydedilecekRekorVarMi);   // ama 5 puan ilk rekor olarak kaydedilir
     }
 
@@ -33,7 +33,7 @@ public sealed class PuanTablosuTestleri
         var tablo = new PuanTablosu(UcPuanlikRekor);
         tablo.PuanEkle(3);
 
-        Assert.IsFalse(tablo.YeniRekorMu);             // E7.2a
+        Assert.IsFalse(tablo.YeniRekorMu);
         Assert.IsFalse(tablo.KaydedilecekRekorVarMi);
     }
 

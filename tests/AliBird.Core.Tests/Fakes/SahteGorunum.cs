@@ -16,7 +16,7 @@ public sealed class SahteGorunum : IOyunGorunumu
     // Son gosterilen goruntu (testte kontrol edilir).
     public OyunGoruntusu? SonGoruntu { get; private set; }
 
-    // true yapilirsa Goster() hata firlatir (cizim hatasi senaryosu, CK3).
+    // true yapilirsa Goster() hata firlatir (cizim hatasi senaryosu).
     public bool GosterHataFirlatsin { get; set; }
 
     public void Goster(OyunGoruntusu goruntu)

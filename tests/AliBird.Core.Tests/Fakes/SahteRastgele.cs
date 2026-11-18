@@ -2,7 +2,7 @@ using AliBird.Core.Abstractions;
 
 namespace AliBird.Core.Tests.Fakes;
 
-// Testler icin elle yazilmis sahte rastgele uretici (K24: mock kutuphanesi yok).
+// Testler icin elle yazilmis sahte rastgele uretici (mock kutuphanesi yok).
 // Her cagrida ayni, onceden bilinen sayiyi dondurur; boylece test sonucu her seferinde ayni olur.
 // Ayrica son cagrida hangi sinirlarin istendigini saklar; testte bunu kontrol edebiliriz.
 public sealed class SahteRastgele : IRastgele

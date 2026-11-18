@@ -4,8 +4,8 @@ using AliBird.Core.Models;
 
 namespace AliBird.WinForms.Rendering;
 
-// Katman 2: BILGI YAZILARI (K11, K12, K59).
-// Tek sorumlulugu: kenarlardaki yazilari cizmek (S):
+// Katman 2: BILGI YAZILARI.
+// Tek sorumlulugu: kenarlardaki yazilari cizmek:
 //   sol ust  -> puan ve rekor (tarihli) / "YENI REKOR!"
 //   sol alt  -> tus aciklamalari (her zaman gorunur)
 //   sag alt  -> ses durumu ("Ses yok" kirmizi / "Ses kapali (M)" gri)
@@ -16,7 +16,7 @@ public sealed class BilgiCizici : IKatmanCizici
     private const string SesYokMetni = "Ses yok";
     private const string SesKapaliMetni = "Ses kapalı (M)";
 
-    // Rekor tarihi gg.aa.yyyy (K10).
+    // Rekor tarihi gg.aa.yyyy.
     private const string TarihBicimi = "dd.MM.yyyy";
     private static readonly CultureInfo Turkce = CultureInfo.GetCultureInfo("tr-TR");
 
@@ -42,7 +42,7 @@ public sealed class BilgiCizici : IKatmanCizici
         AltBilgiyiCiz(g, goruntu.SesDurumu);
     }
 
-    // Sol ust: puan ve rekor (K12, K10, CK35).
+    // Sol ust: puan ve rekor.
     private void PuanVeRekoruCiz(Graphics g, OyunGoruntusu goruntu)
     {
         _yazici.Yaz(g, $"Puan: {goruntu.Puan}", _kaynaklar.OrtaYazi, _kaynaklar.Yazi, new PointF(KenarBoslugu, 10f));
@@ -51,7 +51,7 @@ public sealed class BilgiCizici : IKatmanCizici
 
         if (goruntu.YeniRekorMu)
         {
-            // CK35: rekor kirildiysa rekor satiri guncel puani gosterir + turuncu "YENI REKOR!"
+            // rekor kirildiysa rekor satiri guncel puani gosterir + turuncu "YENI REKOR!"
             string rekorMetni = $"Rekor: {goruntu.Puan}  ";
             _yazici.Yaz(g, rekorMetni, _kaynaklar.KucukYazi, _kaynaklar.Yazi, rekorKonumu);
             float genislik = g.MeasureString(rekorMetni, _kaynaklar.KucukYazi).Width;
@@ -66,7 +66,7 @@ public sealed class BilgiCizici : IKatmanCizici
         _yazici.Yaz(g, metin, _kaynaklar.KucukYazi, _kaynaklar.Yazi, rekorKonumu);
     }
 
-    // Sol alt: tuslar (K11). Sag alt: ses durumu (K12). Ikisi de zemin seridinin uzerinde.
+    // Sol alt: tuslar. Sag alt: ses durumu. Ikisi de zemin seridinin uzerinde.
     private void AltBilgiyiCiz(Graphics g, SesDurumu sesDurumu)
     {
         float y = _ayarlar.ZeminUstY + 12f;

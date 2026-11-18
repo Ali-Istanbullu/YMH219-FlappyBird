@@ -3,10 +3,10 @@ using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
 
-// Engellerin kayma hizini yonetir (K8).
+// Engellerin kayma hizini yonetir.
 // Chrome Dino ile ayni kural: hiz 6'dan baslar, her karede 0.001 artar, 13'te durur.
 // Artis skora degil KAREYE baglidir.
-// Tek sorumlulugu: guncel hizi bilmek ve artirmak (S).
+// Tek sorumlulugu: guncel hizi bilmek ve artirmak.
 public sealed class HizDenetcisi : IHizDenetcisi
 {
     private readonly OyunAyarlari _ayarlar;
@@ -24,7 +24,7 @@ public sealed class HizDenetcisi : IHizDenetcisi
     // Her karede bir kez cagrilir.
     // Math.Min: hiz tavani (13) asmaz. (Dino'da "if < MAX ise ekle" yaziyor ve sayi tavani
     // cok az asabiliyor; biz tam 13'te sabitliyoruz.)
-    // carpan: bu tik kac kare ediyor (K68).
+    // carpan: bu tik kac kare ediyor.
     public void KareIlerlet(float carpan)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);

@@ -5,8 +5,8 @@ using AliBird.WinForms.Rendering;
 
 namespace AliBird.IconGenerator;
 
-// Tek sorumlulugu: verilen boyutta ikon resmini cizmek (S).
-// Gorunus: yuvarlak koseli gece mavisi kare + ortada oyundaki kusun AYNISI (IKusCizici, CK55).
+// Tek sorumlulugu: verilen boyutta ikon resmini cizmek.
+// Gorunus: yuvarlak koseli gece mavisi kare + ortada oyundaki kusun AYNISI (IKusCizici).
 public sealed class IkonCizici
 {
     private const float KenarPayiOrani = 0.10f;   // her kenardan %10 bosluk

@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 namespace AliBird.Infrastructure.Persistence;
 
 // IBozukVeritabaniKurtarici'nin uygulamasi.
-// Tek sorumlulugu: bozuk veritabani dosyasini tanimak ve kenara almak (S).
+// Tek sorumlulugu: bozuk veritabani dosyasini tanimak ve kenara almak.
 public sealed class BozukVeritabaniKurtarici : IBozukVeritabaniKurtarici
 {
     // SQLite'in "dosya bozuk" hata kodlari (sqlite.org/rescode.html):
@@ -45,29 +45,29 @@ public sealed class BozukVeritabaniKurtarici : IBozukVeritabaniKurtarici
             string dosya = _yollar.VeritabaniDosyasi();
             if (File.Exists(dosya))
             {
-                // CK23: silmek yerine yeniden adlandir -> eski veri kurtarilabilir.
+                // silmek yerine yeniden adlandir -> eski veri kurtarilabilir.
                 string yeniAd = Path.Combine(
                     Path.GetDirectoryName(dosya)!,
                     $"alibird.corrupt-{_saat.Simdi:yyyyMMddHHmmss}.db");
                 File.Move(dosya, yeniAd, overwrite: true);
-                _gunlukcu.Bilgi($"Bozuk veritabanı kenara alındı: {yeniAd}");   // K63
+                _gunlukcu.Bilgi($"Bozuk veritabanı kenara alındı: {yeniAd}");
             }
         }
-        catch (Exception kenaraAlmaHatasi)
+        catch (Exception kenaraAlmaHatasi) when (kenaraAlmaHatasi is IOException or UnauthorizedAccessException)
         {
-            // Yeniden adlandirilamazsa silmeyi dene; o da olmazsa loga yaz (R6).
+            // Yeniden adlandirilamazsa silmeyi dene; o da olmazsa loga yaz.
             _hataBildirici.Bildir(kenaraAlmaHatasi, Gorunurluk.SadeceGunluk, string.Empty);
             try
             {
                 File.Delete(_yollar.VeritabaniDosyasi());
             }
-            catch (Exception silmeHatasi)
+            catch (Exception silmeHatasi) when (silmeHatasi is IOException or UnauthorizedAccessException)
             {
                 _hataBildirici.Bildir(silmeHatasi, Gorunurluk.SadeceGunluk, string.Empty);
             }
         }
 
-        // M24 #4: kullanici bilmeli (E).
+        // kullanici bilmeli.
         _hataBildirici.Bildir(bozuklukHatasi, Gorunurluk.EkranVeGunluk,
             "Rekor verisi bozuktu ve sıfırlandı. Yeni rekorlar normal şekilde kaydedilecek.");
     }

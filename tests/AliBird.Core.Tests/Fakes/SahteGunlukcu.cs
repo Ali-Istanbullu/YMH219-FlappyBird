@@ -2,7 +2,7 @@ using AliBird.Core.Abstractions;
 
 namespace AliBird.Core.Tests.Fakes;
 
-// Log yazmak yerine kayitlari listeye ekler; testte "su olay loglandi mi" diye bakariz (K63).
+// Log yazmak yerine kayitlari listeye ekler; testte "su olay loglandi mi" diye bakariz.
 public sealed class SahteGunlukcu : IGunlukcu
 {
     public List<string> Bilgiler { get; } = [];

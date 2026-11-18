@@ -4,12 +4,12 @@ using AliBird.Core.Models;
 
 namespace AliBird.Core.Gameplay;
 
-// TEK bir oyunun (bir turun) motoru. Her "Yeniden Baslat"ta fabrikadan yenisi alinir (K19);
+// TEK bir oyunun (bir turun) motoru. Her "Yeniden Baslat"ta fabrikadan yenisi alinir;
 // boylece onceki oyundan kalan hicbir deger yeni oyuna tasinmaz.
 //
-// Tek sorumlulugu: bir kareyi isletmek, yani parcalari dogru sirayla calistirmak (S).
+// Tek sorumlulugu: bir kareyi isletmek, yani parcalari dogru sirayla calistirmak.
 // Kendisi fizik, carpisma ya da puan hesabi YAPMAZ; bunlari ilgili siniflara devreder.
-// Parcalarini kendisi "new"lemez; hepsi constructor'dan ARAYUZ olarak gelir (R2, DIP, K66).
+// Parcalarini kendisi "new"lemez; hepsi constructor'dan ARAYUZ olarak gelir (DIP).
 // Boylece testte gercek fizik yerine sahte parcalar verilebilir.
 public sealed class OyunMotoru
 {
@@ -69,8 +69,8 @@ public sealed class OyunMotoru
     //  2) engeller guncel hizla sola kayar
     //  3) gecilen engel varsa puan artar
     //  4) carpisma kontrol edilir
-    //  5) hiz bir sonraki kare icin artar (K8)
-    // carpan: bu tik kac kare (1/60 sn) ediyor (K68, delta time). Hareket bununla carpilir.
+    //  5) hiz bir sonraki kare icin artar
+    // carpan: bu tik kac kare (1/60 sn) ediyor (delta time). Hareket bununla carpilir.
     public KareSonucu Ilerlet(float carpan)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);
@@ -82,7 +82,7 @@ public sealed class OyunMotoru
         _kus.Guncelle(carpan);
         _engelAlani.Guncelle(_hizDenetcisi.Hiz * carpan);
 
-        // E3a: kusun sol kenari (X) engelin sag kenarini gecince puan.
+        // kusun sol kenari (X) engelin sag kenarini gecince puan.
         int kazanilanPuan = _engelAlani.YeniGecilenleriSay(_kus.X);
         if (kazanilanPuan > 0)
         {
@@ -92,7 +92,7 @@ public sealed class OyunMotoru
         bool carpti = _carpismaDenetcisi.CarptiMi(_kus.CarpismaKutusu, _engelAlani.Engeller);
         if (carpti)
         {
-            BittiMi = true;   // G3: oyun durur
+            BittiMi = true;   // oyun durur
         }
 
         _hizDenetcisi.KareIlerlet(carpan);

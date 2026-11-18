@@ -1,7 +1,7 @@
 namespace AliBird.WinForms.Rendering;
 
 // IYaziCizici'nin uygulamasi.
-// Tek sorumlulugu: metni once 2 px kaydirilmis golgeyle, sonra asil renkle yazmak (S).
+// Tek sorumlulugu: metni once 2 px kaydirilmis golgeyle, sonra asil renkle yazmak.
 // Koyu gece temasinda yazilar boylece her zeminde okunur.
 public sealed class YaziCizici : IYaziCizici
 {

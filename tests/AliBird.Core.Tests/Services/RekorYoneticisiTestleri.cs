@@ -4,7 +4,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Services;
 
-// Rekorun okunmasi, oyun basina bir kez kaydedilmesi ve loglanmasi (K10, K50, K52, K63, CK4, CK12, M24).
+// Rekorun okunmasi, oyun basina bir kez kaydedilmesi ve loglanmasi.
 [TestClass]
 public sealed class RekorYoneticisiTestleri
 {
@@ -32,7 +32,7 @@ public sealed class RekorYoneticisiTestleri
         await _yonetici.YukleAsync();
 
         Assert.AreEqual(8, _yonetici.Rekor!.Puan);
-        Assert.StartsWith("Rekor okundu: 8", _gunlukcu.Bilgiler.Single());   // K63
+        Assert.StartsWith("Rekor okundu: 8", _gunlukcu.Bilgiler.Single());
     }
 
     [TestMethod]
@@ -40,10 +40,10 @@ public sealed class RekorYoneticisiTestleri
     {
         _depo.OkumaHataFirlatsin = true;
 
-        await _yonetici.YukleAsync();   // exception yok (R6)
+        await _yonetici.YukleAsync();   // exception yok
 
         Assert.IsNull(_yonetici.Rekor);
-        Assert.AreEqual(1, _hata.EkranaGidenSayisi);   // CK4
+        Assert.AreEqual(1, _hata.EkranaGidenSayisi);
     }
 
     [TestMethod]
@@ -82,8 +82,8 @@ public sealed class RekorYoneticisiTestleri
 
         _yonetici.GerekirseKaydet(true, 9);
 
-        Assert.AreEqual(1, _hata.EkranaGidenSayisi);   // M24 #2
-        Assert.AreEqual(9, _yonetici.Rekor!.Puan);     // CK12
+        Assert.AreEqual(1, _hata.EkranaGidenSayisi);
+        Assert.AreEqual(9, _yonetici.Rekor!.Puan);
     }
 
     [TestMethod]

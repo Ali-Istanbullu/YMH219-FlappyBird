@@ -4,15 +4,15 @@ using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
 
-// Oyuncunun kontrol ettigi kus (G1).
+// Oyuncunun kontrol ettigi kus.
 // Tek sorumlulugu: kendi dikey hareketini (ziplama + yer cekimi) hesaplamak.
-// Carpip carpmadigina BAKMAZ; o is CarpismaDenetcisi'nin (S).
+// Carpip carpmadigina BAKMAZ; o is CarpismaDenetcisi'nin.
 public sealed class Kus : IKus
 {
-    // Tum sayisal degerler buradan okunur; sinifin icinde sabit sayi yok (D1b).
+    // Tum sayisal degerler buradan okunur; sinifin icinde sabit sayi yok.
     private readonly OyunAyarlari _ayarlar;
 
-    // Kusun sol ust kosesinin yatay konumu. Oyun boyunca degismez (E1a: x = 100).
+    // Kusun sol ust kosesinin yatay konumu. Oyun boyunca degismez (x = 100).
     public float X { get; }
 
     // Kusun sol ust kosesinin dikey konumu. 0 = ekranin en ustu, buyudukce asagi iner.
@@ -28,19 +28,19 @@ public sealed class Kus : IKus
         _ayarlar = ayarlar;
 
         X = ayarlar.KusX;
-        Y = ayarlar.KusBaslangicY;   // E1a: y = 208
-        DikeyHiz = 0f;               // Oyun basinda kus hareketsiz (E2a)
+        Y = ayarlar.KusBaslangicY;   // y = 208
+        DikeyHiz = 0f;               // Oyun basinda kus hareketsiz
     }
 
     // Space'e basildiginda cagrilir.
-    // Hiz ziplama hizina AYARLANIR, eklenmez (K6). Boylece her ziplama ayni yukseklige cikar.
+    // Hiz ziplama hizina AYARLANIR, eklenmez. Boylece her ziplama ayni yukseklige cikar.
     public void Zipla()
     {
         DikeyHiz = _ayarlar.ZiplamaHizi;
     }
 
     // Her tikte bir kez cagrilir: once yer cekimi hizi degistirir, sonra hiz konumu degistirir.
-    // carpan: bu tik kac kare (1/60 sn) ediyor (K68). 60 FPS'te 1; degerler Dino ile ayni kalir.
+    // carpan: bu tik kac kare (1/60 sn) ediyor. 60 FPS'te 1; degerler Dino ile ayni kalir.
     public void Guncelle(float carpan)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(carpan);
@@ -52,8 +52,8 @@ public sealed class Kus : IKus
         // 2) Konum: hiz kadar hareket et.
         Y += DikeyHiz * carpan;
 
-        // 3) Tavan: kus ekranin ustunden cikamaz, kenarda durur (K6).
-        //    Hiz SIFIRLANMAZ (E6b): yer cekimi hizi tersine cevirene kadar kus tavanda kalir.
+        // 3) Tavan: kus ekranin ustunden cikamaz, kenarda durur.
+        //    Hiz SIFIRLANMAZ: yer cekimi hizi tersine cevirene kadar kus tavanda kalir.
         if (Y < 0f)
         {
             Y = 0f;
@@ -63,7 +63,7 @@ public sealed class Kus : IKus
     // Ekranda cizilecek dikdortgen (30x24).
     public RectangleF Alan => new(X, Y, _ayarlar.KusGenisligi, _ayarlar.KusYuksekligi);
 
-    // Carpisma kontrolunde kullanilan kutu: cizilen alandan her kenardan 3 px kucuk (E4b).
+    // Carpisma kontrolunde kullanilan kutu: cizilen alandan her kenardan 3 px kucuk.
     // Neden? Kus GDI+ ile yuvarlak cizilecek; dikdortgenin bos koselerine degmek oyunu bitirmesin.
     public RectangleF CarpismaKutusu
     {

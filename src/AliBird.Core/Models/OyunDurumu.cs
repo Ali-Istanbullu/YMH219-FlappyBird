@@ -1,7 +1,7 @@
 namespace AliBird.Core.Models;
 
 // Oyunun o anda hangi asamada oldugunu gosteren durum listesi (enum).
-// OyunYoneticisi (presenter) Space tusunun ne yapacagina bu duruma bakarak karar verir (K11).
+// OyunYoneticisi (presenter) Space tusunun ne yapacagina bu duruma bakarak karar verir.
 public enum OyunDurumu
 {
     // Oyun acildi, "baslamak icin tusa bas" yazisi ekranda bekliyor.
@@ -10,9 +10,9 @@ public enum OyunDurumu
     // Oyun oynaniyor: kus ucuyor, engeller kayiyor, timer calisiyor.
     Calisiyor,
 
-    // P tusu ya da pencere odagini kaybetmesi ile oyun dondu (K11).
+    // P tusu ya da pencere odagini kaybetmesi ile oyun dondu.
     Duraklatildi,
 
-    // Kus engele veya zemine carpti (G3). Space ya da buton ile yeniden baslanir (G5).
+    // Kus engele veya zemine carpti. Space ya da buton ile yeniden baslanir.
     OyunBitti
 }

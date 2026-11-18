@@ -6,7 +6,7 @@ using AliBird.Core.Models;
 namespace AliBird.WinForms.Rendering;
 
 // ================================================================================
-//  GDI+ CIZIM KATMANI (K1/K4: cizim tamamen GDI+ ile, harici resim YOK)
+//  GDI+ CIZIM KATMANI (cizim tamamen GDI+ ile, harici resim YOK)
 //
 //  GDI+ nedir? Windows'un 2B cizim kutuphanesi. .NET'te System.Drawing ile kullanilir.
 //  Temel parcalar:
@@ -18,14 +18,14 @@ namespace AliBird.WinForms.Rendering;
 //
 //  Olcekleme: Tum cizim 640x480'lik SANAL alanda yapilir. Cizmeden once Graphics'e
 //  "su kadar kaydir, su kadar buyut" denir (TranslateTransform + ScaleTransform);
-//  boylece pencere ne boyutta olursa olsun ayni kod dogru yere cizer (K5, K7).
+//  boylece pencere ne boyutta olursa olsun ayni kod dogru yere cizer.
 //
-//  Katmanlar (K65, Adim 8d'de bolundu):
+//  Katmanlar:
 //    1) SahneCizici         : gokyuzu, borular, zemin, kus
 //    2) BilgiCizici         : puan/rekor, tus aciklamalari, ses durumu
 //    3) DurumKatmaniCizici  : baslangic / duraklatma / oyun bitti ekrani
 //
-//  Bu sinifin tek sorumlulugu (S): tuvali hazirlamak (temizle, olcekle, kes, yumusat)
+//  Bu sinifin tek sorumlulugu: tuvali hazirlamak (temizle, olcekle, kes, yumusat)
 //  ve katmanlari SIRAYLA cagirmak. Kendisi hicbir sekil cizmez.
 // ================================================================================
 public sealed class OyunCizici : IOyunCizici
@@ -68,7 +68,7 @@ public sealed class OyunCizici : IOyunCizici
         GraphicsState onceki = g.Save();
         try
         {
-            // 1) Sanal alani pencereye tasi ve buyut (K5).
+            // 1) Sanal alani pencereye tasi ve buyut.
             g.TranslateTransform(olcek.KaydirmaX, olcek.KaydirmaY);
             g.ScaleTransform(olcek.Olcek, olcek.Olcek);
 

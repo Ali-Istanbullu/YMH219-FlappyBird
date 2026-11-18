@@ -3,7 +3,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Engel ureticisinin istenen konumda, ayarlara uygun engel verdigini dogrular (K65).
+// Engel ureticisinin istenen konumda, ayarlara uygun engel verdigini dogrular.
 [TestClass]
 public sealed class EngelUreticiTestleri
 {
@@ -16,7 +16,7 @@ public sealed class EngelUreticiTestleri
 
         Assert.AreEqual(500f, engel.X);
         Assert.AreEqual(120f, engel.BoslukUstY);
-        Assert.AreEqual(60f, engel.UstAlan.Width);   // ayarlardan (K7)
+        Assert.AreEqual(60f, engel.UstAlan.Width);   // ayarlardan
         Assert.IsFalse(engel.GecildiMi);
     }
 

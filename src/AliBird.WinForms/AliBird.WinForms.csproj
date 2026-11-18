@@ -9,13 +9,19 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Smoke ve performans testleri Program.ServisleriKur'u (internal) cagirabilsin -->
+    <InternalsVisibleTo Include="AliBird.SmokeTests" />
+    <InternalsVisibleTo Include="AliBird.PerformanceTests" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>AliBird</AssemblyName>
-    <!-- K3: surum 1.0.0 (log ve kurulumda gorunur) -->
+    <!-- surum 1.0.0 (log ve kurulumda gorunur) -->
     <Version>1.0.0</Version>
-    <!-- Adim 10: exe ikonu. Dosya AliBird.IconGenerator ile uretilir; yoksa build yine calisir. -->
+    <!-- exe ikonu. Dosya AliBird.IconGenerator ile uretilir; yoksa build yine calisir. -->
     <ApplicationIcon Condition="Exists('..\..\assets\alibird.ico')">..\..\assets\alibird.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>

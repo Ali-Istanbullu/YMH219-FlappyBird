@@ -3,15 +3,15 @@ using AliBird.Core.Models;
 
 namespace AliBird.Core.Gameplay;
 
-// Bu oyundaki puani ve onceki rekorla karsilastirmayi tutar (G4, K9, K10).
+// Bu oyundaki puani ve onceki rekorla karsilastirmayi tutar.
 // Tek sorumlulugu: sayi tutmak ve "rekor kirildi mi" sorusunu cevaplamak.
-// Veritabanina YAZMAZ; kaydetme isi Adim 4'te OyunYoneticisi + IPuanDeposu'nun (S, DIP).
+// Veritabanina YAZMAZ; kaydetme isi RekorYoneticisi + IPuanDeposu'nun.
 public sealed class PuanTablosu : IPuanTablosu
 {
-    // Oyun basladiginda veritabanindan okunan rekor. Hic yoksa null (D3a).
+    // Oyun basladiginda veritabanindan okunan rekor. Hic yoksa null.
     public RekorKaydi? OncekiRekor { get; }
 
-    // Bu oyundaki puan = gecilen engel sayisi (K9).
+    // Bu oyundaki puan = gecilen engel sayisi.
     public int Puan { get; private set; }
 
     public PuanTablosu(RekorKaydi? oncekiRekor)
@@ -28,9 +28,9 @@ public sealed class PuanTablosu : IPuanTablosu
         Puan += miktar;
     }
 
-    // Ekranda "Yeni Rekor" vurgusu cikmali mi? (K10, E7)
-    //  - Hic rekor yoksa (ilk oyun) vurgu CIKMAZ (E7.1b).
-    //  - Rekora esit puan rekor sayilmaz, gecmek gerekir (E7.2a).
+    // Ekranda "Yeni Rekor" vurgusu cikmali mi?
+    //  - Hic rekor yoksa (ilk oyun) vurgu CIKMAZ.
+    //  - Rekora esit puan rekor sayilmaz, gecmek gerekir.
     public bool YeniRekorMu => OncekiRekor is not null && Puan > OncekiRekor.Puan;
 
     // Oyun bitince veritabanina yeni rekor yazilmali mi?

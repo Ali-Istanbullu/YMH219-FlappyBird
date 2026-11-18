@@ -1,25 +1,26 @@
 using System.Globalization;
 using AliBird.Core.Abstractions;
+using AliBird.Core.Errors;
 using AliBird.Core.Models;
 using AliBird.Infrastructure.FileSystem;
 using Microsoft.Data.Sqlite;
 
 namespace AliBird.Infrastructure.Persistence;
 
-// IPuanDeposu'nun SQLite ile calisan uygulamasi (M11a, K10, N7).
+// IPuanDeposu'nun SQLite ile calisan uygulamasi.
 // Veritabani: %LocalAppData%\AliBird\data\alibird.db
 // Tablo     : Rekor(Id = 1, Puan, Tarih) -> her zaman TEK satir; yeni rekor gelince guncellenir.
 //
-// Tek sorumlulugu (K61, Adim 8c'de daraltildi): rekoru diske yazmak ve diskten okumak (S).
+// Tek sorumlulugu: rekoru diske yazmak ve diskten okumak.
 // Bozuk dosyayi kurtarma isi IBozukVeritabaniKurtarici'da.
 //
 // Hata davranisi:
-//  - Dosya ya da klasor silindiyse: bir sonraki istekte yeniden olusturulur ve loga yazilir (K16, M24 #3).
-//  - Dosya bozuksa: kurtariciya devredilir (M24 #4).
+//  - Dosya ya da klasor silindiyse: bir sonraki istekte yeniden olusturulur ve loga yazilir.
+//  - Dosya bozuksa: kurtariciya devredilir.
 //  - Diger hatalar (izin yok, disk dolu ...): cagirana (RekorYoneticisi) gider; o kullaniciya gosterir.
 public sealed class SqlitePuanDeposu : IPuanDeposu
 {
-    // Tablo yoksa olusturur. "CHECK (Id = 1)": ikinci satir eklenemez (tek rekor, K10).
+    // Tablo yoksa olusturur. "CHECK (Id = 1)": ikinci satir eklenemez (tek rekor).
     private const string TabloOlusturSql =
         "CREATE TABLE IF NOT EXISTS Rekor (" +
         " Id    INTEGER PRIMARY KEY CHECK (Id = 1)," +
@@ -33,7 +34,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         "INSERT INTO Rekor (Id, Puan, Tarih) VALUES (1, $puan, $tarih) " +
         "ON CONFLICT(Id) DO UPDATE SET Puan = excluded.Puan, Tarih = excluded.Tarih";
 
-    // CK25: tarih "o" bicimiyle saklanir (saat dilimi kaybolmaz).
+    // tarih "o" bicimiyle saklanir (saat dilimi kaybolmaz).
     private const string TarihBicimi = "o";
 
     private readonly IUygulamaYollari _yollar;
@@ -58,11 +59,15 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         }
         catch (Exception hata) when (_kurtarici.BozukMu(hata))
         {
-            // M24 #4: bozuk dosya kenara alinir, rekor yokmus gibi devam edilir.
+            // bozuk dosya kenara alinir, rekor yokmus gibi devam edilir.
             _kurtarici.KenaraAl(hata);
             return null;
         }
-        // Diger hatalar bilerek yakalanmaz: RekorYoneticisi yakalayip kullaniciya gosterir (CK4).
+        catch (Exception hata) when (DiskHatasiMi(hata))
+        {
+            // Kilitli dosya, izin, disk: Core'un tanidigi tipe sarilir; RekorYoneticisi kullaniciya gosterir.
+            throw new PuanDeposuHatasi("Rekor dosyası okunamadı.", hata);
+        }
     }
 
     public async Task RekoruKaydetAsync(RekorKaydi rekor, CancellationToken iptal = default)
@@ -71,15 +76,26 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
 
         try
         {
-            await YazAsync(rekor, iptal);
+            try
+            {
+                await YazAsync(rekor, iptal);
+            }
+            catch (Exception hata) when (_kurtarici.BozukMu(hata))
+            {
+                // Bozuk dosyayi kenara al ve yeni (bos) veritabanina BIR KEZ daha yaz; rekor kaybolmasin.
+                _kurtarici.KenaraAl(hata);
+                await YazAsync(rekor, iptal);
+            }
         }
-        catch (Exception hata) when (_kurtarici.BozukMu(hata))
+        catch (Exception hata) when (DiskHatasiMi(hata))
         {
-            // Bozuk dosyayi kenara al ve yeni (bos) veritabanina BIR KEZ daha yaz; rekor kaybolmasin (CK23).
-            _kurtarici.KenaraAl(hata);
-            await YazAsync(rekor, iptal);
+            throw new PuanDeposuHatasi("Rekor dosyası yazılamadı.", hata);
         }
     }
+
+    // Beklenen dis dunya hatalari. Bunlarin disindakiler (bug) sarilmaz, oldugu gibi yukari cikar.
+    private static bool DiskHatasiMi(Exception hata) =>
+        hata is SqliteException or IOException or UnauthorizedAccessException;
 
     // ================= ICERIDEKI ADIMLAR =================
 
@@ -93,7 +109,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
         await using SqliteDataReader okuyucu = await komut.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal))
         {
-            return null;   // D3a: hic rekor yok
+            return null;   // hic rekor yok
         }
 
         int puan = okuyucu.GetInt32(0);
@@ -120,18 +136,18 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
     // Veritabanina baglanti acar ve tablo yoksa olusturur.
     private async Task<SqliteConnection> BaglantiAcAsync(CancellationToken iptal)
     {
-        // VeritabaniDosyasi(): data klasoru silinmisse burada yeniden olusur (K16).
+        // VeritabaniDosyasi(): data klasoru silinmisse burada yeniden olusur.
         string dosya = _yollar.VeritabaniDosyasi();
         bool dosyaVardi = File.Exists(dosya);
 
         string baglantiMetni = new SqliteConnectionStringBuilder
         {
             DataSource = dosya,
-            Mode = SqliteOpenMode.ReadWriteCreate,   // dosya yoksa olustur (K16)
-            Pooling = false                          // CK22: is bitince dosya kilitli kalmasin
+            Mode = SqliteOpenMode.ReadWriteCreate,   // dosya yoksa olustur
+            Pooling = false                          // is bitince dosya kilitli kalmasin
         }.ToString();
 
-        // Kutuphanenin kendi baglanti nesnesi; bu sinifin isi SQLite'a baglanmak (K62).
+        // Kutuphanenin kendi baglanti nesnesi; bu sinifin isi SQLite'a baglanmak.
         var baglanti = new SqliteConnection(baglantiMetni);
         try
         {
@@ -143,7 +159,7 @@ public sealed class SqlitePuanDeposu : IPuanDeposu
 
             if (!dosyaVardi)
             {
-                // M24 #3, K63: dosya yoktu (ilk acilis ya da kullanici sildi) -> yeniden olusturuldu.
+                // dosya yoktu (ilk acilis ya da kullanici sildi) -> yeniden olusturuldu.
                 _gunlukcu.Bilgi($"Veritabanı dosyası bulunamadı, yeniden oluşturuldu: {dosya}");
             }
 

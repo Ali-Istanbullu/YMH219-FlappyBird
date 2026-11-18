@@ -3,8 +3,8 @@ using AliBird.Core.Models;
 
 namespace AliBird.Core.Services;
 
-// IKareSuresiOlcer'in uygulamasi (CK53).
-// Tek sorumlulugu: ardisik iki kare arasindaki sureleri toplamak; ortalama/min/max vermek (S).
+// IKareSuresiOlcer'in uygulamasi.
+// Tek sorumlulugu: ardisik iki kare arasindaki sureleri toplamak; ortalama/min/max vermek.
 // Loga yazmaz; ozeti OyunYoneticisi oyun bitince loga yazar.
 public sealed class KareSuresiOlcer : IKareSuresiOlcer
 {

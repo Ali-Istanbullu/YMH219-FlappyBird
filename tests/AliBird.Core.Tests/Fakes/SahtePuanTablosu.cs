@@ -2,7 +2,7 @@ using AliBird.Core.Abstractions;
 
 namespace AliBird.Core.Tests.Fakes;
 
-// Sadece eklenen puani toplar (K66).
+// Sadece eklenen puani toplar.
 public sealed class SahtePuanTablosu : IPuanTablosu
 {
     public int Puan { get; private set; }

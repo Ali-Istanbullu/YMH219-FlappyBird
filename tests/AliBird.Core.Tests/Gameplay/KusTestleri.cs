@@ -3,7 +3,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Kus sinifinin fizik kurallarini dogrular (K6, E1, E4, E6).
+// Kus sinifinin fizik kurallarini dogrular.
 [TestClass]
 public sealed class KusTestleri
 {
@@ -15,9 +15,9 @@ public sealed class KusTestleri
     {
         var kus = new Kus(_ayarlar);
 
-        Assert.AreEqual(100f, kus.X);        // E1a
-        Assert.AreEqual(208f, kus.Y);        // E1a
-        Assert.AreEqual(0f, kus.DikeyHiz);   // E2a
+        Assert.AreEqual(100f, kus.X);
+        Assert.AreEqual(208f, kus.Y);
+        Assert.AreEqual(0f, kus.DikeyHiz);
     }
 
     [TestMethod]
@@ -28,7 +28,7 @@ public sealed class KusTestleri
 
         kus.Zipla();
 
-        // Hiz -12'ye AYARLANMALI, -11.4'e degil (K6: eklenmez, ayarlanir).
+        // Hiz -12'ye AYARLANMALI, -11.4'e degil (eklenmez, ayarlanir).
         Assert.AreEqual(-12f, kus.DikeyHiz);
     }
 
@@ -67,8 +67,8 @@ public sealed class KusTestleri
 
         kus.Guncelle(1f);   // hiz -11.4, y = 5 - 11.4 = -6.4 -> 0'a sabitlenir
 
-        Assert.AreEqual(0f, kus.Y);                       // K6: tavanda durur
-        Assert.AreEqual(-11.4f, kus.DikeyHiz, 0.0001f);   // E6b: hiz sifirlanmaz
+        Assert.AreEqual(0f, kus.Y);                       // tavanda durur
+        Assert.AreEqual(-11.4f, kus.DikeyHiz, 0.0001f);   // hiz sifirlanmaz
     }
 
     [TestMethod]
@@ -78,7 +78,7 @@ public sealed class KusTestleri
 
         var kutu = kus.CarpismaKutusu;
 
-        // E4b: 30x24 -> 24x18, sol ust kose 3 px iceride.
+        // 30x24 -> 24x18, sol ust kose 3 px iceride.
         Assert.AreEqual(103f, kutu.X);
         Assert.AreEqual(211f, kutu.Y);
         Assert.AreEqual(24f, kutu.Width);

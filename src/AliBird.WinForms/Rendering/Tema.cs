@@ -1,11 +1,11 @@
 namespace AliBird.WinForms.Rendering;
 
-// Oyunun renk paleti. Ali'nin secimi: "Gece" temasi (Adim 8, G1b).
+// Oyunun renk paleti: "Gece" temasi.
 // Butun renkler tek yerde; baska bir tema istenirse sadece burasi degisir (OCP).
 // "record": olusturulduktan sonra degistirilemez; DI'a tek ornek olarak kaydedilir.
 public sealed record Tema
 {
-    // Pencere oyun alanindan genisse kalan kenarlar (oran korundugu icin, K7).
+    // Pencere oyun alanindan genisse kalan kenarlar (oran korundugu icin).
     public required Color KenarBosluk { get; init; }
     public required Color Gokyuzu { get; init; }
 
@@ -29,7 +29,7 @@ public sealed record Tema
     public required Color SesKapali { get; init; }    // gri
     public required Color Karartma { get; init; }     // duraklatma / oyun bitti ekraninda yari saydam ortu
 
-    // G1b: Gece temasi - lacivert gokyuzu, gri-mor borular, acik sari kus, koyu gri zemin.
+    // Gece temasi - lacivert gokyuzu, gri-mor borular, acik sari kus, koyu gri zemin.
     public static Tema Gece() => new()
     {
         KenarBosluk = Color.FromArgb(11, 15, 31),

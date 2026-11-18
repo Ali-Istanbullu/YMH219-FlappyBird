@@ -8,5 +8,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/AliBird.Core.Tests/AliBird.Core.Tests.csproj" />
     <Project Path="tests/AliBird.Infrastructure.Tests/AliBird.Infrastructure.Tests.csproj" />
+    <Project Path="tests/AliBird.PerformanceTests/AliBird.PerformanceTests.csproj" />
+    <Project Path="tests/AliBird.SmokeTests/AliBird.SmokeTests.csproj" />
   </Folder>
 </Solution>

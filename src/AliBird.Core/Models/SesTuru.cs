@@ -1,6 +1,6 @@
 namespace AliBird.Core.Models;
 
-// Oyunda calinabilecek 4 ayri sesin listesi (K13).
+// Oyunda calinabilecek 4 ayri sesin listesi.
 // ISesCalar.Cal(...) metoduna hangi sesin calinacagini bu enum ile soyleriz.
 public enum SesTuru
 {
@@ -13,6 +13,6 @@ public enum SesTuru
     // Kus engele ya da zemine carptigi an.
     Carpma,
 
-    // Carpmanin hemen ardindan, oyun bitti ekrani gelirken (carpma sesinden ayri, K13).
+    // Carpmanin hemen ardindan, oyun bitti ekrani gelirken (carpma sesinden ayri).
     OyunBitti
 }

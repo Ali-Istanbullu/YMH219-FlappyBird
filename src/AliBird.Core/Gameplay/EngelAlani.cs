@@ -3,8 +3,8 @@ using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
 
-// Ekrandaki engellerin hepsini yonetir (G2).
-// Tek sorumlulugu: engelleri kaydirmak, ekrandan cikani saga tasimak, gecilenleri saymak (S).
+// Ekrandaki engellerin hepsini yonetir.
+// Tek sorumlulugu: engelleri kaydirmak, ekrandan cikani saga tasimak, gecilenleri saymak.
 public sealed class EngelAlani : IEngelAlani
 {
     private readonly OyunAyarlari _ayarlar;
@@ -12,7 +12,7 @@ public sealed class EngelAlani : IEngelAlani
     // Bosluk yuksekligini secmek icin. Arayuz oldugu icin testte sahte sinif verilebilir (DIP).
     private readonly IRastgele _rastgele;
 
-    // Engelleri bu sinif "new"lemez; ureticiden ister (K65, R2).
+    // Engelleri bu sinif "new"lemez; ureticiden ister.
     private readonly IEngelUretici _engelUretici;
 
     private readonly List<Engel> _engeller;
@@ -36,7 +36,7 @@ public sealed class EngelAlani : IEngelAlani
         _engeller = new List<Engel>(engelSayisi);
         for (int i = 0; i < engelSayisi; i++)
         {
-            // Ilk engel x = 960'ta (E5b), sonrakiler 320'ser piksel arayla: 960, 1280, 1600.
+            // Ilk engel x = 960'ta, sonrakiler 320'ser piksel arayla: 960, 1280, 1600.
             float x = ayarlar.IlkEngelX + i * ayarlar.EngelAraligi;
             _engeller.Add(_engelUretici.Olustur(x, RastgeleBoslukUstY()));
         }
@@ -61,7 +61,7 @@ public sealed class EngelAlani : IEngelAlani
         }
     }
 
-    // Bu karede kusun yeni gectigi engel sayisini dondurur (genelde 0 ya da 1). Puan buna gore artar (G4).
+    // Bu karede kusun yeni gectigi engel sayisini dondurur (genelde 0 ya da 1). Puan buna gore artar.
     public int YeniGecilenleriSay(float kusSolKenari)
     {
         int sayi = 0;
@@ -75,7 +75,7 @@ public sealed class EngelAlani : IEngelAlani
         return sayi;
     }
 
-    // Boslugun ust kenari icin rastgele bir Y secer (K7).
+    // Boslugun ust kenari icin rastgele bir Y secer.
     // Bosluk tavana en az 60 px, zemine en az 60 px uzak olmali:
     //   en az  = 60
     //   en cok = 440 (zemin) - 60 - 150 (bosluk) = 230

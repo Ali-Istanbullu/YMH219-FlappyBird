@@ -1,11 +1,11 @@
 namespace AliBird.WinForms.Platform;
 
-// Oyunun ayni anda yalnizca TEK kopyasinin calismasini saglar (K17, M25b).
+// Oyunun ayni anda yalnizca TEK kopyasinin calismasini saglar.
 // Nasil? Windows'ta isimli bir "Mutex" (kilit) olusturur. Ilk acilan kopya kilidin sahibi olur;
 // ikinci kopya ayni isimli kilidi zaten var bulur ve kapanir.
 // Neden onemli? Iki kopya ayni anda ayni veritabanina ve log dosyasina yazmasin.
 //
-// R6: Kilit olusturulurken hata olursa oyun ENGELLENMEZ; ilk kopya kabul edilir ve devam edilir.
+// Kilit olusturulurken hata olursa oyun ENGELLENMEZ; ilk kopya kabul edilir ve devam edilir.
 public sealed class TekKopyaKoruyucu : IDisposable
 {
     private readonly Mutex? _kilit;
@@ -20,9 +20,9 @@ public sealed class TekKopyaKoruyucu : IDisposable
             _kilit = new Mutex(initiallyOwned: true, name: ad, createdNew: out bool yeniOlusturuldu);
             _sahibiz = yeniOlusturuldu;
         }
-        catch
+        catch (Exception hata) when (hata is UnauthorizedAccessException or IOException or WaitHandleCannotBeOpenedException)
         {
-            // Kilit olusturulamadi (izin vb.): oyunu acmayi engellemeyelim (R6).
+            // Kilit olusturulamadi (izin vb.): oyunu acmayi engellemeyelim.
             _kilit = null;
             _sahibiz = true;
         }
@@ -33,17 +33,10 @@ public sealed class TekKopyaKoruyucu : IDisposable
 
     public void Dispose()
     {
-        try
+        if (_kilit is not null && _sahibiz)
         {
-            if (_kilit is not null && _sahibiz)
-            {
-                _kilit.ReleaseMutex();
-            }
-            _kilit?.Dispose();
+            _kilit.ReleaseMutex();
         }
-        catch
-        {
-            // R6: kapanista bile exception disari cikmaz.
-        }
+        _kilit?.Dispose();
     }
 }

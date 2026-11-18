@@ -1,6 +1,6 @@
 namespace AliBird.IconGenerator;
 
-// Tek sorumlulugu: PNG resimlerden .ico dosyasi yazmak (S).
+// Tek sorumlulugu: PNG resimlerden .ico dosyasi yazmak.
 // ICO bicimi (Windows Vista+ PNG sikistirmali girdileri destekler):
 //   ICONDIR      6 bayt : 0 (ayrilmis), 1 (tur = ikon), girdi sayisi
 //   ICONDIRENTRY 16 bayt: genislik, yukseklik (256 icin 0), renk sayisi 0, ayrilmis 0,

@@ -3,7 +3,7 @@ using AliBird.Core.Abstractions;
 
 namespace AliBird.Core.Tests.Fakes;
 
-// Fizik yapmayan kus: cagrilari ortak listeye yazar (K66).
+// Fizik yapmayan kus: cagrilari ortak listeye yazar.
 public sealed class SahteKus(List<string> cagrilar) : IKus
 {
     public float X => 100f;

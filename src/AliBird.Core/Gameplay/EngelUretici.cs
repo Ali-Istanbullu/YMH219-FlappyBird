@@ -3,9 +3,9 @@ using AliBird.Core.Configuration;
 
 namespace AliBird.Core.Gameplay;
 
-// IEngelUretici'nin uygulamasi (K65).
-// Tek sorumlulugu: ayarlarla birlikte yeni bir Engel olusturmak (S).
-// "new" kullanmasi bu yuzden serbest: nesne uretmek bu sinifin tek isi (fabrika, K60 ile ayni mantik).
+// IEngelUretici'nin uygulamasi.
+// Tek sorumlulugu: ayarlarla birlikte yeni bir Engel olusturmak.
+// "new" kullanmasi bu yuzden serbest: nesne uretmek bu sinifin tek isi (fabrika).
 public sealed class EngelUretici : IEngelUretici
 {
     private readonly OyunAyarlari _ayarlar;

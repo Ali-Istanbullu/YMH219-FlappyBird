@@ -5,23 +5,22 @@ using Serilog.Core;   // Logger tipi
 
 namespace AliBird.Infrastructure.Logging;
 
-// IGunlukcu'nun Serilog ile calisan uygulamasi (M12b, K15).
-// Tek sorumlulugu: Core'dan gelen log isteklerini Serilog'a aktarmak (S).
+// IGunlukcu'nun Serilog ile calisan uygulamasi.
+// Tek sorumlulugu: Core'dan gelen log isteklerini Serilog'a aktarmak.
 //
-// K15: 1 MB'a ulasan dosya kapanir, yenisi acilir (alibird_001.log ...); en fazla 5 dosya
+// 1 MB'a ulasan dosya kapanir, yenisi acilir (alibird_001.log ...); en fazla 5 dosya
 //      tutulur, en eskisi Serilog tarafindan OTOMATIK silinir (elle silme kodu yok).
-// K14: her satirda tarih ve saat var (CK15).
-// R6 : Bu sinif ASLA exception firlatmaz. Log yazilamazsa uygulama sessizce devam eder (M24 #5).
+// her satirda tarih ve saat var.
+// Bu sinif ASLA exception firlatmaz. Log yazilamazsa uygulama sessizce devam eder.
 //
-// IDisposable: uygulama kapanirken bekleyen satirlar diske yazilip dosya kapatilsin diye (CK17).
+// IDisposable: uygulama kapanirken bekleyen satirlar diske yazilip dosya kapatilsin diye.
 // DI container kapanirken Dispose'u kendisi cagirir.
 public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
 {
-    // K15 degerleri.
     private const long DosyaBoyutuSiniri = 1024 * 1024;   // 1 MB
     private const int TutulacakDosyaSayisi = 5;           // toplam ~5 MB
 
-    // CK15: "2026-11-17 14:50:03.123 +03:00 [ERR] mesaj" + alt satirda hata ayrintisi.
+    // "2026-11-17 14:50:03.123 +03:00 [ERR] mesaj" + alt satirda hata ayrintisi.
     private const string SatirBicimi =
         "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
@@ -36,9 +35,9 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
             // Serilog'un kendi "yapilandirma -> logger" kurulumu. Bu sinifin tek isi Serilog'a
             // baglanmak oldugu icin Serilog nesnesini burada kurmak S'ye uygundur.
             _logger = new LoggerConfiguration()
-                .MinimumLevel.Information()                     // CK16: Bilgi ve ustu
+                .MinimumLevel.Information()                     // Bilgi ve ustu
                 .WriteTo.File(
-                    path: yollar.GunlukDosyasi(),               // logs klasoru yoksa burada olusur (K16)
+                    path: yollar.GunlukDosyasi(),               // logs klasoru yoksa burada olusur
                     outputTemplate: SatirBicimi,
                     fileSizeLimitBytes: DosyaBoyutuSiniri,
                     rollOnFileSizeLimit: true,
@@ -48,7 +47,7 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
         catch
         {
             // Log klasoru olusturulamadi ya da dosya acilamadi (izin yok, disk dolu ...).
-            // R6 + M24 #5: uygulama durmaz; hicbir sey yazmayan "bos" logger kullanilir.
+            // uygulama durmaz; hicbir sey yazmayan "bos" logger kullanilir.
             // Bilerek bos: log yazilamiyorsa bu hatayi yazacak bir yer de yok.
             // Hicbir hedefi (sink) olmayan logger: her cagriyi kabul eder, hicbir yere yazmaz.
             _logger = new LoggerConfiguration().CreateLogger();
@@ -64,7 +63,7 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
         }
         catch
         {
-            // R6: log hatasi uygulamayi asla durdurmaz (M24 #5).
+            // log hatasi uygulamayi asla durdurmaz.
         }
     }
 
@@ -76,7 +75,7 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
         }
         catch
         {
-            // R6: log hatasi uygulamayi asla durdurmaz (M24 #5).
+            // log hatasi uygulamayi asla durdurmaz.
         }
     }
 
@@ -89,7 +88,7 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
         }
         catch
         {
-            // R6: log hatasi uygulamayi asla durdurmaz (M24 #5).
+            // log hatasi uygulamayi asla durdurmaz.
         }
     }
 
@@ -97,12 +96,12 @@ public sealed class SerilogGunlukcu : IGunlukcu, IDisposable
     {
         try
         {
-            // Bekleyen satirlari diske yazar ve dosyayi kapatir (CK17).
+            // Bekleyen satirlari diske yazar ve dosyayi kapatir.
             _logger.Dispose();
         }
         catch
         {
-            // R6: kapanista bile exception disari cikmaz.
+            // kapanista bile exception disari cikmaz.
         }
     }
 }

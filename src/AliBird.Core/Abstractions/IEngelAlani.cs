@@ -2,7 +2,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Abstractions;
 
-// Engellerin OyunMotoru'na gorunen yuzu (K66).
+// Engellerin OyunMotoru'na gorunen yuzu.
 public interface IEngelAlani
 {
     IReadOnlyList<Engel> Engeller { get; }

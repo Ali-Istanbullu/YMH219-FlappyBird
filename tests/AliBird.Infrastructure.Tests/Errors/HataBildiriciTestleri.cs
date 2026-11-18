@@ -4,7 +4,7 @@ using AliBird.Infrastructure.Tests.Fakes;
 
 namespace AliBird.Infrastructure.Tests.Errors;
 
-// Hatanin dogru kanala gittigini ve bildiricinin asla cokmedigini dogrular (K14, M24, CK18, R6).
+// Hatanin dogru kanala gittigini ve bildiricinin asla cokmedigini dogrular.
 [TestClass]
 public sealed class HataBildiriciTestleri
 {
@@ -43,7 +43,7 @@ public sealed class HataBildiriciTestleri
     {
         _bildirici.Bildir(new Exception("x"), Gorunurluk.EkranVeGunluk, "");
 
-        Assert.AreEqual("Beklenmeyen bir hata oluştu.", _kullanici.GosterilenMesajlar.Single());   // CK18
+        Assert.AreEqual("Beklenmeyen bir hata oluştu.", _kullanici.GosterilenMesajlar.Single());
     }
 
     [TestMethod]
@@ -72,6 +72,6 @@ public sealed class HataBildiriciTestleri
         _gunlukcu.HataFirlatsin = true;
         _kullanici.HataFirlatsin = true;
 
-        _bildirici.Bildir(null!, Gorunurluk.EkranVeGunluk, "m");   // R6: hicbir exception disari cikmaz
+        _bildirici.Bildir(null!, Gorunurluk.EkranVeGunluk, "m");   // hicbir exception disari cikmaz
     }
 }

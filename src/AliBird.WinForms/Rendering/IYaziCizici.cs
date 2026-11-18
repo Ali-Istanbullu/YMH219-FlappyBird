@@ -1,6 +1,6 @@
 namespace AliBird.WinForms.Rendering;
 
-// Golgeli yazi yazma sozlesmesi (K65). Uc katman da ayni sekilde yazi yazdigi icin tek yerde.
+// Golgeli yazi yazma sozlesmesi. Uc katman da ayni sekilde yazi yazdigi icin tek yerde.
 public interface IYaziCizici
 {
     // bicim null ise metin konumun sagina dogru yazilir; ortalamak/saga yaslamak icin bicim verilir.

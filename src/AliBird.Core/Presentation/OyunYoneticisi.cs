@@ -6,42 +6,40 @@ using AliBird.Core.Services;
 
 namespace AliBird.Core.Presentation;
 
-// MVP'deki Presenter (M19a, N5a). Oyun mantigi ile ekran arasindaki koordinator.
+// MVP'deki Presenter. Oyun mantigi ile ekran arasindaki koordinator.
 //
-// Tek sorumlulugu (K61, Adim 8c'de daraltildi): KOORDINASYON
-//   - Form'dan gelen ham tuslari oyunun durumuna gore yorumlamak (D5a, CK1)
+// Tek sorumlulugu: KOORDINASYON
+//   - Form'dan gelen ham tuslari oyunun durumuna gore yorumlamak
 //   - Her tikte oyunu bir kare ilerletmek ve Form'a cizilecek goruntuyu vermek
 // Kendisi YAPMAZ, ilgili servise birakir:
 //   - Rekor okuma/kaydetme          -> IRekorYoneticisi
 //   - Ses kapali mi / ses calma     -> ISesYoneticisi
-//   - Ardisik kare hatasi sayimi    -> IKareHataSayaci
-//   - Kare araligi olcumu           -> IKareSuresiOlcer (Adim 9)
-//   - Sure -> kare carpani          -> IKareCarpaniHesaplayici (K68)
+//   - Kare araligi olcumu           -> IKareSuresiOlcer
+//   - Sure -> kare carpani          -> IKareCarpaniHesaplayici
 //   - Fizik, carpisma, puan         -> OyunMotoru (fabrikadan)
 //
-// Butun bagimliliklar constructor'dan arayuz olarak gelir (R2, D). Container'i bilmez.
-// Her dis cagri ve her kare try/catch ile korunur (R4, R6).
+// Butun bagimliliklar constructor'dan arayuz olarak gelir. Container'i bilmez.
+// Burada try/catch yok: beklenen hatalari (rekor dosyasi, ses cihazi) ilgili servis yakalar.
+// Kodumuzdaki bir hata (bug) yutulmaz: Debug'da debugger durur, Release'te genel yakalayici loglar.
 public sealed class OyunYoneticisi
 {
     private readonly IOyunGorunumu _gorunum;
     private readonly IOyunMotoruFabrikasi _fabrika;
     private readonly IRekorYoneticisi _rekorYoneticisi;
     private readonly ISesYoneticisi _sesYoneticisi;
-    private readonly IKareHataSayaci _kareHataSayaci;
     private readonly IKareSuresiOlcer _kareSuresiOlcer;
     private readonly IKareCarpaniHesaplayici _kareCarpani;
     private readonly IZamanlayici _zamanlayici;
-    private readonly IHataBildirici _hataBildirici;
     private readonly IGunlukcu _gunlukcu;
     private readonly ISaat _saat;
     private readonly OyunAyarlari _ayarlar;
 
-    // Su anki oyunun motoru. Her yeni oyunda fabrikadan yenisi alinir (K19).
+    // Su anki oyunun motoru. Her yeni oyunda fabrikadan yenisi alinir.
     private OyunMotoru _motor = null!;   // BaslatAsync'te atanir
 
     private OyunDurumu _durum = OyunDurumu.Hazir;
 
-    // Game Over aninin zamani: 750 ms boyunca Space dikkate alinmaz (CK2).
+    // Game Over aninin zamani: 750 ms boyunca Space dikkate alinmaz.
     private DateTime _oyunBittiZamani;
 
     public OyunYoneticisi(
@@ -49,11 +47,9 @@ public sealed class OyunYoneticisi
         IOyunMotoruFabrikasi fabrika,
         IRekorYoneticisi rekorYoneticisi,
         ISesYoneticisi sesYoneticisi,
-        IKareHataSayaci kareHataSayaci,
         IKareSuresiOlcer kareSuresiOlcer,
         IKareCarpaniHesaplayici kareCarpani,
         IZamanlayici zamanlayici,
-        IHataBildirici hataBildirici,
         IGunlukcu gunlukcu,
         ISaat saat,
         OyunAyarlari ayarlar)
@@ -62,11 +58,9 @@ public sealed class OyunYoneticisi
         ArgumentNullException.ThrowIfNull(fabrika);
         ArgumentNullException.ThrowIfNull(rekorYoneticisi);
         ArgumentNullException.ThrowIfNull(sesYoneticisi);
-        ArgumentNullException.ThrowIfNull(kareHataSayaci);
         ArgumentNullException.ThrowIfNull(kareSuresiOlcer);
         ArgumentNullException.ThrowIfNull(kareCarpani);
         ArgumentNullException.ThrowIfNull(zamanlayici);
-        ArgumentNullException.ThrowIfNull(hataBildirici);
         ArgumentNullException.ThrowIfNull(gunlukcu);
         ArgumentNullException.ThrowIfNull(saat);
         ArgumentNullException.ThrowIfNull(ayarlar);
@@ -75,11 +69,9 @@ public sealed class OyunYoneticisi
         _fabrika = fabrika;
         _rekorYoneticisi = rekorYoneticisi;
         _sesYoneticisi = sesYoneticisi;
-        _kareHataSayaci = kareHataSayaci;
         _kareSuresiOlcer = kareSuresiOlcer;
         _kareCarpani = kareCarpani;
         _zamanlayici = zamanlayici;
-        _hataBildirici = hataBildirici;
         _gunlukcu = gunlukcu;
         _saat = saat;
         _ayarlar = ayarlar;
@@ -93,11 +85,11 @@ public sealed class OyunYoneticisi
     // Uygulama acilinca bir kez: rekoru oku, ilk oyunu hazirla, zamanlayiciyi baslat.
     public async Task BaslatAsync()
     {
-        // 1) Rekor (hatalari RekorYoneticisi kendisi yakalar ve bildirir, CK4).
+        // 1) Rekor (hatalari RekorYoneticisi kendisi yakalar ve bildirir).
         await _rekorYoneticisi.YukleAsync();
 
-        // 2) Ilk oyun (Hazir: kus sabit bekler, E2a).
-        Guvenli(YeniOyunHazirla, Gorunurluk.EkranVeGunluk, "Oyun hazırlanamadı.");
+        // 2) Ilk oyun (Hazir: kus sabit bekler).
+        YeniOyunHazirla();
 
         // 3) Form olaylarina abone ol.
         _gorunum.BoslukBasildi += BoslukBasildiginda;
@@ -106,30 +98,23 @@ public sealed class OyunYoneticisi
         _gorunum.YenidenBaslatTiklandi += YenidenBaslatTiklandiginda;
         _gorunum.OdakKaybedildi += OdakKaybedildiginde;
 
-        // 4) Oyun dongusu (CK10: zamanlayici hep calisir; Hazir/Duraklatildi'da sadece cizim).
-        Guvenli(() =>
-        {
-            _zamanlayici.AralikMs = _ayarlar.ZamanlayiciAraligiMs;
-            _zamanlayici.Tik += TikGeldiginde;
-            _zamanlayici.Baslat();
-        }, Gorunurluk.EkranVeGunluk, "Oyun döngüsü başlatılamadı.");
+        // 4) Oyun dongusu (zamanlayici hep calisir; Hazir/Duraklatildi'da sadece cizim).
+        _zamanlayici.AralikMs = _ayarlar.ZamanlayiciAraligiMs;
+        _zamanlayici.Tik += TikGeldiginde;
+        _zamanlayici.Baslat();
 
-        Guvenli(GoruntuyuGonder, Gorunurluk.SadeceGunluk, string.Empty);
+        GoruntuyuGonder();
     }
 
-    // Pencere kapanirken: oyun suruyorsa rekor kaydedilir (K52 b), kayit en fazla 2 sn beklenir (CK6).
+    // Pencere kapanirken: oyun suruyorsa rekor kaydedilir, kayit en fazla 2 sn beklenir.
     public async Task KapatAsync()
     {
-        Guvenli(() =>
-        {
-            _zamanlayici.Durdur();
-            _zamanlayici.Tik -= TikGeldiginde;
-        }, Gorunurluk.SadeceGunluk, string.Empty);
+        _zamanlayici.Durdur();
+        _zamanlayici.Tik -= TikGeldiginde;
 
         if (_durum is OyunDurumu.Calisiyor or OyunDurumu.Duraklatildi)
         {
-            Guvenli(() => _rekorYoneticisi.GerekirseKaydet(_motor.KaydedilecekRekorVarMi, _motor.Puan),
-                Gorunurluk.SadeceGunluk, string.Empty);
+            _rekorYoneticisi.GerekirseKaydet(_motor.KaydedilecekRekorVarMi, _motor.Puan);
         }
 
         await _rekorYoneticisi.BekleyenKaydiBekleAsync(_ayarlar.KapanisKayitBeklemeMs);
@@ -139,147 +124,124 @@ public sealed class OyunYoneticisi
 
     private void TikGeldiginde(object? gonderen, EventArgs e)
     {
-        try
+        if (_durum == OyunDurumu.Calisiyor)
         {
-            if (_durum == OyunDurumu.Calisiyor)
-            {
-                // K68: gercek gecen sure -> kac kare -> oyun her bilgisayarda ayni hizda akar.
-                double gecenMs = _kareSuresiOlcer.KareGeldi();
-                KareSonucu sonuc = _motor.Ilerlet(_kareCarpani.Hesapla(gecenMs));
+            // Gercek gecen sure -> kac kare -> oyun her bilgisayarda ayni hizda akar.
+            double gecenMs = _kareSuresiOlcer.KareGeldi();
+            KareSonucu sonuc = _motor.Ilerlet(_kareCarpani.Hesapla(gecenMs));
 
-                if (sonuc.KazanilanPuan > 0)
-                {
-                    _sesYoneticisi.Cal(SesTuru.Puan);
-                }
-
-                if (sonuc.Carpti)
-                {
-                    OyunuBitir();
-                }
-            }
-            else
+            if (sonuc.KazanilanPuan > 0)
             {
-                // Hazir / Duraklatildi / OyunBitti: bekleme suresi olcume girmesin.
-                _kareSuresiOlcer.AraVer();
+                _sesYoneticisi.Cal(SesTuru.Puan);
             }
 
-            GoruntuyuGonder();
-            _kareHataSayaci.BasariliKare();
-        }
-        catch (Exception hata)
-        {
-            // CK3: hata sayilir; sinira ulasilip kullaniciya soylendiyse oyun durdurulur.
-            bool durdur = _kareHataSayaci.HatayiKaydet(hata);
-            if (durdur && _durum == OyunDurumu.Calisiyor)
+            if (sonuc.Carpti)
             {
-                Guvenli(OyunuBitir, Gorunurluk.SadeceGunluk, string.Empty);
+                OyunuBitir();
             }
         }
+        else
+        {
+            // Hazir / Duraklatildi / OyunBitti: bekleme suresi olcume girmesin.
+            _kareSuresiOlcer.AraVer();
+        }
+
+        GoruntuyuGonder();
     }
 
-    // Kus carpti: oyun biter (G3).
+    // Kus carpti: oyun biter.
     private void OyunuBitir()
     {
         _durum = OyunDurumu.OyunBitti;
         _oyunBittiZamani = _saat.Simdi;
 
-        // K13: carpma ve oyun bitti icin iki ayri ses.
+        // carpma ve oyun bitti icin iki ayri ses.
         _sesYoneticisi.Cal(SesTuru.Carpma);
         _sesYoneticisi.Cal(SesTuru.OyunBitti);
 
-        // K63 + CK53: puan ve bu oyunda olculen gercek kare araligi.
+        // puan ve bu oyunda olculen gercek kare araligi.
         KareOlcumu? olcum = _kareSuresiOlcer.Ozet();
         _gunlukcu.Bilgi(olcum is null
             ? $"Oyun bitti. Puan: {_motor.Puan}"
             : $"Oyun bitti. Puan: {_motor.Puan}. Kare araligi: {olcum}");
 
-        // K52: rekor oyun bitince kaydedilir (gerekiyorsa, arka planda).
+        // rekor oyun bitince kaydedilir (gerekiyorsa, arka planda).
         _rekorYoneticisi.GerekirseKaydet(_motor.KaydedilecekRekorVarMi, _motor.Puan);
     }
 
-    // Yeni oyun: temiz motor, Hazir durumu (CK7).
+    // Yeni oyun: temiz motor, Hazir durumu.
     private void YeniOyunHazirla()
     {
         _motor = _fabrika.Olustur(_rekorYoneticisi.Rekor);
         _durum = OyunDurumu.Hazir;
         _rekorYoneticisi.YeniOyunBasladi();
-        _kareHataSayaci.Sifirla();
         _kareSuresiOlcer.Sifirla();
     }
 
-    // ================= TUSLAR (CK1) =================
+    // ================= TUSLAR =================
 
     private void BoslukBasildiginda(object? gonderen, EventArgs e)
     {
-        Guvenli(() =>
+        switch (_durum)
         {
-            switch (_durum)
-            {
-                case OyunDurumu.Hazir:
-                    // Ilk Space oyunu baslatir ve kusu ziplatir.
-                    _durum = OyunDurumu.Calisiyor;
-                    _motor.Zipla();
-                    _sesYoneticisi.Cal(SesTuru.Zipla);
-                    break;
+            case OyunDurumu.Hazir:
+                // Ilk Space oyunu baslatir ve kusu ziplatir.
+                _durum = OyunDurumu.Calisiyor;
+                _motor.Zipla();
+                _sesYoneticisi.Cal(SesTuru.Zipla);
+                break;
 
-                case OyunDurumu.Calisiyor:
-                    _motor.Zipla();
-                    _sesYoneticisi.Cal(SesTuru.Zipla);
-                    break;
+            case OyunDurumu.Calisiyor:
+                _motor.Zipla();
+                _sesYoneticisi.Cal(SesTuru.Zipla);
+                break;
 
-                case OyunDurumu.Duraklatildi:
-                    // Bilerek bos: duraklatmadan sadece P ile cikilir.
-                    break;
+            case OyunDurumu.Duraklatildi:
+                // Bilerek bos: duraklatmadan sadece P ile cikilir.
+                break;
 
-                case OyunDurumu.OyunBitti:
-                    // CK2: Game Over'dan sonraki 750 ms icinde basilan Space yok sayilir.
-                    TimeSpan gecen = _saat.Simdi - _oyunBittiZamani;
-                    if (gecen.TotalMilliseconds >= _ayarlar.YenidenBaslatmaBeklemeMs)
-                    {
-                        YeniOyunHazirla();
-                    }
-                    break;
-            }
-        }, Gorunurluk.SadeceGunluk, string.Empty);
+            case OyunDurumu.OyunBitti:
+                // Game Over'dan sonraki 750 ms icinde basilan Space yok sayilir.
+                TimeSpan gecen = _saat.Simdi - _oyunBittiZamani;
+                if (gecen.TotalMilliseconds >= _ayarlar.YenidenBaslatmaBeklemeMs)
+                {
+                    YeniOyunHazirla();
+                }
+                break;
+        }
     }
 
     private void PBasildiginda(object? gonderen, EventArgs e)
     {
-        Guvenli(() =>
+        // P: oynarken duraklatir, duraklatilmisken devam ettirir.
+        if (_durum == OyunDurumu.Calisiyor)
         {
-            // P: oynarken duraklatir, duraklatilmisken devam ettirir.
-            if (_durum == OyunDurumu.Calisiyor)
-            {
-                _durum = OyunDurumu.Duraklatildi;
-            }
-            else if (_durum == OyunDurumu.Duraklatildi)
-            {
-                _durum = OyunDurumu.Calisiyor;
-            }
-        }, Gorunurluk.SadeceGunluk, string.Empty);
+            _durum = OyunDurumu.Duraklatildi;
+        }
+        else if (_durum == OyunDurumu.Duraklatildi)
+        {
+            _durum = OyunDurumu.Calisiyor;
+        }
     }
 
     private void MBasildiginda(object? gonderen, EventArgs e)
     {
-        // CK5: M her durumda calisir. Karar SesYoneticisi'nde.
-        Guvenli(_sesYoneticisi.SessizligiDegistir, Gorunurluk.SadeceGunluk, string.Empty);
+        // M her durumda calisir. Karar SesYoneticisi'nde.
+        _sesYoneticisi.SessizligiDegistir();
     }
 
     private void YenidenBaslatTiklandiginda(object? gonderen, EventArgs e)
     {
-        // Buton 750 ms beklemesinden etkilenmez (CK2).
-        Guvenli(() =>
+        // Buton 750 ms beklemesinden etkilenmez.
+        if (_durum == OyunDurumu.OyunBitti)
         {
-            if (_durum == OyunDurumu.OyunBitti)
-            {
-                YeniOyunHazirla();
-            }
-        }, Gorunurluk.SadeceGunluk, string.Empty);
+            YeniOyunHazirla();
+        }
     }
 
     private void OdakKaybedildiginde(object? gonderen, EventArgs e)
     {
-        // K11: odak kaybinda oyun duraklar; kendiliginden devam ETMEZ (CK1).
+        // odak kaybinda oyun duraklar; kendiliginden devam ETMEZ.
         if (_durum == OyunDurumu.Calisiyor)
         {
             _durum = OyunDurumu.Duraklatildi;
@@ -301,18 +263,5 @@ public sealed class OyunYoneticisi
             _sesYoneticisi.Durum);
 
         _gorunum.Goster(goruntu);
-    }
-
-    // Bir islemi try/catch icinde calistirir (R4). Kod tekrarini onlemek icin tek yerde.
-    private void Guvenli(Action islem, Gorunurluk gorunurluk, string kullaniciMesaji)
-    {
-        try
-        {
-            islem();
-        }
-        catch (Exception hata)
-        {
-            _hataBildirici.Bildir(hata, gorunurluk, kullaniciMesaji);
-        }
     }
 }

@@ -1,6 +1,6 @@
 namespace AliBird.Infrastructure.Tests.Fakes;
 
-// Her test icin benzersiz, bos bir gecici klasor (CK14).
+// Her test icin benzersiz, bos bir gecici klasor.
 // Testler paralel calisirken ayni dosyaya yazip birbirini bozmasin diye her test kendi klasorunu kullanir.
 // "using var klasor = new GeciciKlasor();" ile kullanilir; test bitince klasor silinir.
 public sealed class GeciciKlasor : IDisposable

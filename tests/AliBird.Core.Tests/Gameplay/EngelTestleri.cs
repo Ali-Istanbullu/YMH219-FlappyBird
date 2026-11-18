@@ -3,7 +3,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Tek bir engelin konum, alan ve gecis kurallarini dogrular (K7, G2, E3).
+// Tek bir engelin konum, alan ve gecis kurallarini dogrular.
 [TestClass]
 public sealed class EngelTestleri
 {
@@ -23,7 +23,7 @@ public sealed class EngelTestleri
         Assert.AreEqual(250f, engel.AltAlan.Y);
         Assert.AreEqual(190f, engel.AltAlan.Height);
 
-        Assert.AreEqual(60f, engel.UstAlan.Width);   // K7
+        Assert.AreEqual(60f, engel.UstAlan.Width);
     }
 
     [TestMethod]
@@ -49,7 +49,7 @@ public sealed class EngelTestleri
     [TestMethod]
     public void GecisiKontrolEt_SadeceIlkGeciste_TrueDoner()
     {
-        // Engel 0-60 arasinda; kusun sol kenari 61 -> sag kenari gecti (E3a).
+        // Engel 0-60 arasinda; kusun sol kenari 61 -> sag kenari gecti.
         var engel = new Engel(_ayarlar, 0f, 100f);
 
         Assert.IsTrue(engel.GecisiKontrolEt(61f));    // ilk gecis: puan
@@ -61,7 +61,7 @@ public sealed class EngelTestleri
     {
         var engel = new Engel(_ayarlar, 0f, 100f);
 
-        // Sol kenar tam 60 = engelin sag kenari: "tamamen gecti" sayilmaz (E3a).
+        // Sol kenar tam 60 = engelin sag kenari: "tamamen gecti" sayilmaz.
         Assert.IsFalse(engel.GecisiKontrolEt(60f));
     }
 

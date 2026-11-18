@@ -3,7 +3,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// OyunMotoru'nu SAHTE parcalarla test eder (K66): fizik/carpisma hesabindan bagimsiz olarak
+// OyunMotoru'nu SAHTE parcalarla test eder: fizik/carpisma hesabindan bagimsiz olarak
 // sadece motorun kendi isini (dogru sira, puan aktarimi, bitince durma) dogrular.
 [TestClass]
 public sealed class OyunMotoruSiraTestleri

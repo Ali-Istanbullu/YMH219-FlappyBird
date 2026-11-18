@@ -2,7 +2,7 @@ using AliBird.Core.Models;
 
 namespace AliBird.WinForms.Rendering;
 
-// Ekranin bir "katmanini" cizen sozlesme (K65).
+// Ekranin bir "katmanini" cizen sozlesme.
 // OyunCizici katmanlari sirayla cagirir: sahne -> bilgi yazilari -> durum ekrani.
 // Yeni bir katman (ornegin bulutlar) eklemek icin mevcut kod degismez; yeni bir sinif yazilip
 // Program.cs'te kaydedilir (O: genisletmeye acik, degisiklige kapali).

@@ -3,7 +3,7 @@ using AliBird.Core.Gameplay;
 
 namespace AliBird.Core.Tests.Fakes;
 
-// Engelsiz alan: her karede GecilenSayisi kadar "gecildi" der (K66).
+// Engelsiz alan: her karede GecilenSayisi kadar "gecildi" der.
 public sealed class SahteEngelAlani(List<string> cagrilar) : IEngelAlani
 {
     public int GecilenSayisi { get; set; }

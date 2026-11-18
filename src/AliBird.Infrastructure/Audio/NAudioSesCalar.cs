@@ -5,17 +5,17 @@ using NAudio.Wave.SampleProviders;
 
 namespace AliBird.Infrastructure.Audio;
 
-// ISesCalar'in NAudio ile calisan uygulamasi (M14b, K13).
-// Tek sorumlulugu: hazir sesleri ses kartina gondermek (S). Sesleri ISesUreteci uretir.
+// ISesCalar'in NAudio ile calisan uygulamasi.
+// Tek sorumlulugu: hazir sesleri ses kartina gondermek. Sesleri ISesUreteci uretir.
 //
 // Nasil calisir?
 //   - Acilista dort ses BIR KEZ uretilip bellekte tutulur (her Cal'da yeniden hesaplanmaz).
 //   - Bir "karistirici" (MixingSampleProvider) surekli ses kartina bagli calisir.
-//   - Cal() karistiriciya yeni bir ses ekler; ayni anda birden cok ses ust uste calabilir (M14b).
+//   - Cal() karistiriciya yeni bir ses ekler; ayni anda birden cok ses ust uste calabilir.
 //
-// R6: Bu sinif ASLA exception firlatmaz.
+// Beklenen hatalar (ses cihazi):
 //   - Ses cihazi yoksa / acilamazsa: KullanilabilirMi = false, oyun sessiz devam eder,
-//     sag altta kirmizi "Ses yok" gorunur (K12, K13, M24 #6). Hata sadece loga yazilir.
+//     sag altta kirmizi "Ses yok" gorunur. Hata sadece loga yazilir.
 //   - Oyun sirasinda cihaz cikarilirsa (kulaklik vb.): ayni sekilde "Ses yok"a gecilir.
 public sealed class NAudioSesCalar : ISesCalar, IDisposable
 {
@@ -24,7 +24,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
     private const int TamponMs = 50;
 
     private readonly IHataBildirici _hataBildirici;
-    private readonly ISesSaglayiciUretici _saglayiciUretici;   // K65
+    private readonly ISesSaglayiciUretici _saglayiciUretici;
     private readonly Dictionary<SesTuru, float[]> _sesler = [];
     private readonly MixingSampleProvider _karistirici;
     private readonly WaveOut? _cikis;
@@ -48,32 +48,32 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
         // boylece her Cal()'da cihazi yeniden baslatmak gerekmez.
         _karistirici = new MixingSampleProvider(bicim) { ReadFully = true };
 
+        // Dort sesi bir kez uret ve sakla. Saf hesap: hata olursa bu bir bug'dir, yakalanmaz.
+        foreach (SesTuru tur in Enum.GetValues<SesTuru>())
+        {
+            _sesler[tur] = uretici.Uret(tur);
+        }
+
         try
         {
-            // 1) Dort sesi bir kez uret ve sakla.
-            foreach (SesTuru tur in Enum.GetValues<SesTuru>())
-            {
-                _sesler[tur] = uretici.Uret(tur);
-            }
-
-            // 2) Ses cihazini ac ve karistiriciyi calmaya basla.
-            //    NAudio'nun kendi cikis nesnesi; bu sinifin tek isi NAudio'ya baglanmak oldugu icin burada kurulur.
+            // Ses cihazini ac ve karistiriciyi calmaya basla.
+            // Buradaki her hata disaridan gelir (ses cihazi yok, surucu hatasi): beklenen durum.
             _cikis = new WaveOut { BufferMilliseconds = TamponMs };   // NAudio 3: eski adi WaveOutEvent
             _cikis.PlaybackStopped += CalmaDurdugunda;
             _cikis.Init(_karistirici);
             _cikis.Play();
 
             _kullanilabilir = true;
-            gunlukcu.Bilgi("Ses cihazı hazır.");   // K63: ses cihazinin durumu
+            gunlukcu.Bilgi("Ses cihazı hazır.");
         }
         catch (Exception hata)
         {
-            // Ses cihazi yok, surucu hatasi vb. -> sessiz mod (M24 #6, R6).
+            // Sessiz mod: sag altta "Ses yok" gorunur, oyun devam eder.
             _kullanilabilir = false;
             CikisiKapat(_cikis);
             _cikis = null;
             _hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
-            gunlukcu.Uyari("Ses cihazı açılamadı, oyun sessiz devam ediyor.");   // K63
+            gunlukcu.Uyari("Ses cihazı açılamadı, oyun sessiz devam ediyor.");
         }
     }
 
@@ -86,19 +86,9 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             return;
         }
 
-        try
-        {
-            if (_sesler.TryGetValue(tur, out float[]? ornekler))
-            {
-                // Her calmada yeni bir saglayici: ayni ses ust uste binebilir.
-                _karistirici.AddMixerInput(_saglayiciUretici.Olustur(ornekler, _karistirici.WaveFormat));
-            }
-        }
-        catch (Exception hata)
-        {
-            // R6: ses hatasi oyunu durdurmaz.
-            _hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
-        }
+        // Sadece bellekteki karistiriciya eklenir; cihaza dogrudan dokunulmaz.
+        // Her calmada yeni bir saglayici: ayni ses ust uste binebilir.
+        _karistirici.AddMixerInput(_saglayiciUretici.Olustur(_sesler[tur], _karistirici.WaveFormat));
     }
 
     // Calma beklenmedik sekilde durdu (cihaz cikarildi vb.).
@@ -110,7 +100,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             return;   // Dispose ile bilerek durduruldu
         }
 
-        _kullanilabilir = false;   // sag altta "Ses yok" gorunsun (K12)
+        _kullanilabilir = false;   // sag altta "Ses yok" gorunsun
         _hataBildirici.Bildir(e.Exception, Gorunurluk.SadeceGunluk, string.Empty);
     }
 
@@ -124,7 +114,7 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
         CikisiKapat(_cikis);
     }
 
-    // Cihazi durdurup birakir; hata olsa bile disari sizdirmaz (R6).
+    // Cihazi durdurup birakir. Cihaz zaten kopmus olabilir; kapanista bu hata onemsizdir.
     private static void CikisiKapat(WaveOut? cikis)
     {
         try
@@ -132,9 +122,9 @@ public sealed class NAudioSesCalar : ISesCalar, IDisposable
             cikis?.Stop();
             cikis?.Dispose();
         }
-        catch
+        catch (Exception)
         {
-            // R6: kapanista bile exception disari cikmaz.
+            // bilerek bos: kopmus cihazi kapatirken gelen hata kapanisi engellemesin.
         }
     }
 }

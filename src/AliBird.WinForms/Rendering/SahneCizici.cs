@@ -3,8 +3,8 @@ using AliBird.Core.Models;
 
 namespace AliBird.WinForms.Rendering;
 
-// Katman 1: SAHNE (K4: tamamen GDI+, harici resim yok).
-// Tek sorumlulugu: oyun dunyasini cizmek -> gokyuzu, borular, zemin, kus (S).
+// Katman 1: SAHNE (tamamen GDI+, harici resim yok).
+// Tek sorumlulugu: oyun dunyasini cizmek -> gokyuzu, borular, zemin, kus.
 // Arkadan one dogru cizer: once arkadaki, sonra ondeki.
 public sealed class SahneCizici : IKatmanCizici
 {
@@ -13,7 +13,7 @@ public sealed class SahneCizici : IKatmanCizici
     private const float AgizTasmasi = 4f;   // her yana 4 px
 
     private readonly CizimKaynaklari _kaynaklar;
-    private readonly IKusCizici _kusCizici;   // CK55: kus ikonla ortak
+    private readonly IKusCizici _kusCizici;   // kus ikonla ortak
     private readonly OyunAyarlari _ayarlar;
 
     public SahneCizici(CizimKaynaklari kaynaklar, IKusCizici kusCizici, OyunAyarlari ayarlar)
@@ -61,7 +61,7 @@ public sealed class SahneCizici : IKatmanCizici
         g.DrawRectangle(_kaynaklar.BoruKenar, alan.X, alan.Y, alan.Width, alan.Height);
     }
 
-    // Zemin: alttaki 40 px'lik serit ve ust kenarinda bir cizgi (K6).
+    // Zemin: alttaki 40 px'lik serit ve ust kenarinda bir cizgi.
     private void ZeminiCiz(Graphics g)
     {
         float y = _ayarlar.ZeminUstY;

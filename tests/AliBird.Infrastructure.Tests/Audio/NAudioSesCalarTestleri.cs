@@ -5,22 +5,20 @@ using NAudio.Wave;
 
 namespace AliBird.Infrastructure.Tests.Audio;
 
-// Ses calicinin hicbir durumda cokmedigini dogrular (R6, M24 #6).
+// Ses calicinin cihaz durumlarinda cokmedigini, bug'lari ise gizlemedigini dogrular.
 // Not: Bu testler hoparlorden ses CALMAZ (Cal cagrilari ya devre disi durumda ya da Dispose sonrasi).
 [TestClass]
 public sealed class NAudioSesCalarTestleri
 {
     [TestMethod]
-    public void SesHazirlanamazsa_CokmezKullanilamazOlurVeLogaYazar()
+    public void SesUretimindekiBug_Yutulmaz()
     {
+        // Ses uretimi saf hesaptir; oradaki hata bir bug'dir ve gizlenmemeli.
         var hata = new SahteHataBildirici();
 
-        var calar = new NAudioSesCalar(new HataVerenSesUreteci(), new DiziSesSaglayiciUretici(), hata, new SahteGunlukcu());
-
-        Assert.IsFalse(calar.KullanilabilirMi);                         // sag altta "Ses yok"
-        Assert.AreEqual(Gorunurluk.SadeceGunluk, hata.Bildirimler.Single().Gorunurluk);
-        calar.Cal(SesTuru.Zipla);                                         // exception yok
-        calar.Dispose();
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            new NAudioSesCalar(new HataVerenSesUreteci(), new DiziSesSaglayiciUretici(), hata, new SahteGunlukcu()));
+        Assert.IsEmpty(hata.Bildirimler);
     }
 
     [TestMethod]

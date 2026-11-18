@@ -9,5 +9,15 @@ public sealed class SahteSesCalar : ISesCalar
     public bool KullanilabilirMi { get; set; } = true;
     public List<SesTuru> CalinanSesler { get; } = [];
 
-    public void Cal(SesTuru tur) => CalinanSesler.Add(tur);
+    // true: Cal() kod hatasi (bug) firlatir.
+    public bool BugOlsun { get; set; }
+
+    public void Cal(SesTuru tur)
+    {
+        if (BugOlsun)
+        {
+            throw new InvalidOperationException("Sahte bug");
+        }
+        CalinanSesler.Add(tur);
+    }
 }

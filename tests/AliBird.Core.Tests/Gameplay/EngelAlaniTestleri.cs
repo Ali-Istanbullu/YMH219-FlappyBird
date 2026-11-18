@@ -4,7 +4,7 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Gameplay;
 
-// Engellerin dizilisi, kaymasi ve yeniden konumlanmasi (G2, K7, E5).
+// Engellerin dizilisi, kaymasi ve yeniden konumlanmasi.
 [TestClass]
 public sealed class EngelAlaniTestleri
 {
@@ -16,7 +16,7 @@ public sealed class EngelAlaniTestleri
         var alan = new EngelAlani(_ayarlar, new SahteRastgele(100), new EngelUretici(_ayarlar));
 
         Assert.HasCount(3, alan.Engeller);                // 640 / 320 + 1
-        Assert.AreEqual(960f, alan.Engeller[0].X);        // E5b
+        Assert.AreEqual(960f, alan.Engeller[0].X);
         Assert.AreEqual(1280f, alan.Engeller[1].X);
         Assert.AreEqual(1600f, alan.Engeller[2].X);
     }
@@ -28,7 +28,7 @@ public sealed class EngelAlaniTestleri
 
         _ = new EngelAlani(_ayarlar, rastgele, new EngelUretici(_ayarlar));
 
-        // K7: en az 60, en cok 440 - 60 - 150 = 230 (ust sinir haric oldugu icin 231 istenir).
+        // en az 60, en cok 440 - 60 - 150 = 230 (ust sinir haric oldugu icin 231 istenir).
         Assert.AreEqual(60, rastgele.SonEnAz);
         Assert.AreEqual(231, rastgele.SonEnCok);
     }

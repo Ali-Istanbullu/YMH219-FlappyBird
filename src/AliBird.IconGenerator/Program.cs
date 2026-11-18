@@ -4,11 +4,11 @@ using AliBird.IconGenerator;
 using AliBird.WinForms.Rendering;
 
 // ================================================================================
-//  ALIBIRD IKON URETICI (Adim 10)
+//  ALIBIRD IKON URETICI
 //  Kullanim (repo kokunden):  dotnet run --project src/AliBird.IconGenerator -- assets
 //  Uretir: assets/alibird.png (256x256) ve assets/alibird.ico (16..256, 7 boyut)
-//  Bu dosya aracin kompozisyon kokudur; nesneler burada baglanir (R2). DI kutuphanesine
-//  gerek yok: 4 nesnelik bir arac (CK56).
+//  Bu dosya aracin kompozisyon kokudur; nesneler burada baglanir. DI kutuphanesine
+//  gerek yok: 4 nesnelik bir arac.
 // ================================================================================
 try
 {
@@ -18,7 +18,7 @@ try
     int[] boyutlar = [16, 24, 32, 48, 64, 128, 256];
 
     var ayarlar = new OyunAyarlari();
-    using var kaynaklar = new CizimKaynaklari(Tema.Gece());   // oyunla ayni renkler (G1b)
+    using var kaynaklar = new CizimKaynaklari(Tema.Gece());   // oyunla ayni renkler
     var cizici = new IkonCizici(new KusCizici(kaynaklar), kaynaklar, ayarlar);
 
     var resimler = new List<(int Boyut, byte[] Png)>();
@@ -42,7 +42,7 @@ try
 }
 catch (Exception hata)
 {
-    // R4: arac hata verirse nedeni yazilir, cikis kodu 1 olur.
+    // arac hata verirse nedeni yazilir, cikis kodu 1 olur.
     Console.Error.WriteLine($"Ikon uretilemedi: {hata}");
     return 1;
 }

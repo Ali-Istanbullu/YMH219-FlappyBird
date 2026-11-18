@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace AliBird.Core.Models;
 
-// Bir oyun boyunca olculen kare araliklari (CK53).
+// Bir oyun boyunca olculen kare araliklari.
 public sealed record KareOlcumu(int AralikSayisi, double OrtalamaMs, double EnAzMs, double EnCokMs)
 {
     // Saniyedeki kare sayisi (ortalamadan).

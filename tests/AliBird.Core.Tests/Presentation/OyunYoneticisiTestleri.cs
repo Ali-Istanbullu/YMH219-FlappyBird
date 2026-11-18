@@ -7,9 +7,8 @@ using AliBird.Core.Tests.Fakes;
 
 namespace AliBird.Core.Tests.Presentation;
 
-// Presenter'in durum gecislerini, ses, rekor ve hata davranisini dogrular
-// (K11, K13, K14, K52, K63, CK1-CK7, M24).
-// Adim 8c'den sonra presenter'a GERCEK RekorYoneticisi/SesYoneticisi/KareHataSayaci verilir;
+// Presenter'in durum gecislerini, ses, rekor ve hata davranisini dogrular.
+// Presenter'a GERCEK RekorYoneticisi/SesYoneticisi verilir;
 // bunlarin altindaki dis dunya (depo, ses calar, log) sahte siniflardir.
 [TestClass]
 public sealed class OyunYoneticisiTestleri
@@ -43,12 +42,10 @@ public sealed class OyunYoneticisiTestleri
             _gorunum,
             fabrika,
             new RekorYoneticisi(_depo, _hata, _gunlukcu, _saat),
-            new SesYoneticisi(_ses, _hata),
-            new KareHataSayaci(_hata, ayarlar),
+            new SesYoneticisi(_ses),
             new KareSuresiOlcer(new SahteKronometre()),
             new KareCarpaniHesaplayici(ayarlar),
             _zamanlayici,
-            _hata,
             _gunlukcu,
             _saat,
             ayarlar);
@@ -85,7 +82,7 @@ public sealed class OyunYoneticisiTestleri
 
         var yonetici = await BaslatilmisYonetici();
 
-        Assert.AreEqual(1, _hata.EkranaGidenSayisi);   // CK4, M24 #1
+        Assert.AreEqual(1, _hata.EkranaGidenSayisi);
         Assert.AreEqual(OyunDurumu.Hazir, yonetici.Durum);
         Assert.IsNull(_gorunum.SonGoruntu!.Rekor);
     }
@@ -108,7 +105,7 @@ public sealed class OyunYoneticisiTestleri
 
         _zamanlayici.Tikla(10);
 
-        Assert.AreEqual(208f, _gorunum.SonGoruntu!.KusAlani.Y);   // E2a
+        Assert.AreEqual(208f, _gorunum.SonGoruntu!.KusAlani.Y);
     }
 
     [TestMethod]
@@ -120,7 +117,7 @@ public sealed class OyunYoneticisiTestleri
         _gorunum.PyeBas();
         Assert.AreEqual(OyunDurumu.Duraklatildi, yonetici.Durum);
 
-        _gorunum.BoslugaBas();                                     // CK1: etkisiz
+        _gorunum.BoslugaBas();                                     // etkisiz
         Assert.AreEqual(OyunDurumu.Duraklatildi, yonetici.Durum);
 
         _gorunum.PyeBas();
@@ -135,7 +132,7 @@ public sealed class OyunYoneticisiTestleri
 
         _gorunum.OdagiKaybet();
 
-        Assert.AreEqual(OyunDurumu.Duraklatildi, yonetici.Durum);   // K11
+        Assert.AreEqual(OyunDurumu.Duraklatildi, yonetici.Durum);
     }
 
     [TestMethod]
@@ -147,8 +144,8 @@ public sealed class OyunYoneticisiTestleri
         _gorunum.BoslugaBas();
         _zamanlayici.Tikla();
 
-        Assert.IsEmpty(_ses.CalinanSesler);                              // D4b
-        Assert.AreEqual(SesDurumu.Kapali, _gorunum.SonGoruntu!.SesDurumu); // K12
+        Assert.IsEmpty(_ses.CalinanSesler);
+        Assert.AreEqual(SesDurumu.Kapali, _gorunum.SonGoruntu!.SesDurumu);
     }
 
     [TestMethod]
@@ -173,7 +170,7 @@ public sealed class OyunYoneticisiTestleri
         OyunBitenekadarIlerlet(yonetici);
 
         Assert.AreEqual(OyunDurumu.OyunBitti, yonetici.Durum);
-        CollectionAssert.Contains(_ses.CalinanSesler, SesTuru.Carpma);     // K13
+        CollectionAssert.Contains(_ses.CalinanSesler, SesTuru.Carpma);
         CollectionAssert.Contains(_ses.CalinanSesler, SesTuru.OyunBitti);
     }
 
@@ -186,11 +183,11 @@ public sealed class OyunYoneticisiTestleri
 
         _saat.Ileri(500);
         _gorunum.BoslugaBas();
-        Assert.AreEqual(OyunDurumu.OyunBitti, yonetici.Durum);   // CK2
+        Assert.AreEqual(OyunDurumu.OyunBitti, yonetici.Durum);
 
         _saat.Ileri(300);
         _gorunum.BoslugaBas();
-        Assert.AreEqual(OyunDurumu.Hazir, yonetici.Durum);       // CK7
+        Assert.AreEqual(OyunDurumu.Hazir, yonetici.Durum);
     }
 
     [TestMethod]
@@ -208,7 +205,7 @@ public sealed class OyunYoneticisiTestleri
     [TestMethod]
     public async Task OyunBitince_YeniRekorKaydedilir()
     {
-        // Ilk engel kusun arkasinda: ilk karede 1 puan (rekor yokken 1+ puan ilk rekor olur, K50).
+        // Ilk engel kusun arkasinda: ilk karede 1 puan (rekor yokken 1+ puan ilk rekor olur).
         var yonetici = await BaslatilmisYonetici(new OyunAyarlari { IlkEngelX = -50f });
         _gorunum.BoslugaBas();
 
@@ -227,7 +224,7 @@ public sealed class OyunYoneticisiTestleri
 
         OyunBitenekadarIlerlet(yonetici);
 
-        Assert.AreEqual(0, _depo.KaydetmeSayisi);   // K50
+        Assert.AreEqual(0, _depo.KaydetmeSayisi);
     }
 
     [TestMethod]
@@ -239,7 +236,7 @@ public sealed class OyunYoneticisiTestleri
 
         OyunBitenekadarIlerlet(yonetici);
 
-        Assert.AreEqual(1, _hata.EkranaGidenSayisi);   // M24 #2
+        Assert.AreEqual(1, _hata.EkranaGidenSayisi);
     }
 
     [TestMethod]
@@ -251,7 +248,7 @@ public sealed class OyunYoneticisiTestleri
 
         await yonetici.KapatAsync();
 
-        Assert.AreEqual(1, _depo.KayitliRekor!.Puan);   // K52 b
+        Assert.AreEqual(1, _depo.KayitliRekor!.Puan);
         Assert.IsFalse(_zamanlayici.CalisiyorMu);
     }
 
@@ -268,17 +265,34 @@ public sealed class OyunYoneticisiTestleri
     }
 
     [TestMethod]
-    public async Task UstUsteUcKareHatasi_OyunuDurdururVeEkranaSadeceBirKezBildirir()
+    public async Task KaredekiBug_Yutulmaz()
     {
-        var yonetici = await BaslatilmisYonetici();
+        // Kodumuzdaki hata (bug) gizlenmez: Debug'da debugger durur, Release'te genel yakalayici loglar.
+        await BaslatilmisYonetici();
         _gorunum.BoslugaBas();
         _gorunum.GosterHataFirlatsin = true;
 
-        _zamanlayici.Tikla(10);
+        Assert.ThrowsExactly<InvalidOperationException>(() => _zamanlayici.Tikla());
+        Assert.IsEmpty(_hata.Bildirimler);
+    }
 
-        Assert.AreEqual(OyunDurumu.OyunBitti, yonetici.Durum);   // CK3
-        Assert.AreEqual(1, _hata.EkranaGidenSayisi);              // M24 #7: tekrar tekrar gosterilmez
-        Assert.HasCount(3, _hata.Bildirimler);                   // log da her karede dolmaz
+    [TestMethod]
+    public async Task TustakiBug_Yutulmaz()
+    {
+        await BaslatilmisYonetici();
+        _ses.BugOlsun = true;
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => _gorunum.BoslugaBas());
+        Assert.IsEmpty(_hata.Bildirimler);
+    }
+
+    [TestMethod]
+    public async Task RekorOkumadakiBug_Yutulmaz()
+    {
+        _depo.OkumadaBugOlsun = true;
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => BaslatilmisYonetici());
+        Assert.IsEmpty(_hata.Bildirimler);
     }
 
     [TestMethod]
@@ -289,7 +303,7 @@ public sealed class OyunYoneticisiTestleri
 
         OyunBitenekadarIlerlet(yonetici);
 
-        // K63 + CK53: puan ve olculen kare araligi ayni satirda.
+        // puan ve olculen kare araligi ayni satirda.
         string? satir = _gunlukcu.Bilgiler.FirstOrDefault(m => m.StartsWith("Oyun bitti.", StringComparison.Ordinal));
         Assert.IsNotNull(satir);
         Assert.StartsWith("Oyun bitti. Puan: 0. Kare araligi: ort ", satir);
@@ -303,6 +317,6 @@ public sealed class OyunYoneticisiTestleri
 
         OyunBitenekadarIlerlet(yonetici);
 
-        Assert.IsTrue(_gunlukcu.Bilgiler.Any(b => b.StartsWith("Yeni rekor kaydedildi: 1")));   // K63
+        Assert.IsTrue(_gunlukcu.Bilgiler.Any(b => b.StartsWith("Yeni rekor kaydedildi: 1")));
     }
 }

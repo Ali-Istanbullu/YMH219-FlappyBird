@@ -3,12 +3,12 @@ using AliBird.Core.Models;
 
 namespace AliBird.WinForms.Rendering;
 
-// Katman 3: DURUM EKRANI (K59).
-// Tek sorumlulugu: oyunun durumuna gore ortadaki buyuk yazilari cizmek (S):
+// Katman 3: DURUM EKRANI.
+// Tek sorumlulugu: oyunun durumuna gore ortadaki buyuk yazilari cizmek:
 //   Hazir        -> "AliBird" + "Baslamak icin SPACE'e bas"
 //   Duraklatildi -> karartma + "Duraklatildi" + "Devam etmek icin P'ye bas"
 //   OyunBitti    -> karartma + "Oyun Bitti" + puan + "Yeniden baslamak icin SPACE"
-//                   (butonun kendisi gercek bir WinForms butonu; AnaForm onu yerlestirir, CK32)
+// (butonun kendisi gercek bir WinForms butonu; AnaForm onu yerlestirir)
 //   Calisiyor    -> hicbir sey
 public sealed class DurumKatmaniCizici : IKatmanCizici
 {

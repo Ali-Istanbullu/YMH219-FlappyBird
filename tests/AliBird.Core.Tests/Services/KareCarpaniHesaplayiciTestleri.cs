@@ -3,7 +3,7 @@ using AliBird.Core.Services;
 
 namespace AliBird.Core.Tests.Services;
 
-// ms -> kare carpani donusumunu dogrular (K68).
+// ms -> kare carpani donusumunu dogrular.
 [TestClass]
 public sealed class KareCarpaniHesaplayiciTestleri
 {

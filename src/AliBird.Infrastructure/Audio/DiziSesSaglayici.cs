@@ -5,7 +5,7 @@ namespace AliBird.Infrastructure.Audio;
 // Onceden uretilmis bir ses dizisini NAudio'ya parca parca veren kucuk yardimci.
 // NAudio sesi calarken "bana su kadar ornek ver" diye Read'i tekrar tekrar cagirir;
 // dizi bitince 0 doneriz ve NAudio bu sesi karistiricidan kendiliginden cikarir.
-// Her Cal() cagrisinda yenisi olusturulur; boylece ayni ses ust uste calinabilir (M14b).
+// Her Cal() cagrisinda yenisi olusturulur; boylece ayni ses ust uste calinabilir.
 public sealed class DiziSesSaglayici : ISampleProvider
 {
     private readonly float[] _ornekler;

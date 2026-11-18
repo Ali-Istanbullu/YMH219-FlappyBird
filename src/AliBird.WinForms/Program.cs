@@ -20,11 +20,11 @@ namespace AliBird.WinForms;
 // ================================================================================
 //  UYGULAMANIN BASLANGIC NOKTASI ve "KOMPOZISYON KOKU" (Composition Root)
 //
-//  Tek sorumlulugu (K61): uygulamayi ayaga kaldirmak.
+//  Tek sorumlulugu: uygulamayi ayaga kaldirmak.
 //   1) Genel hata yakalayiciyi devreye almak (isi GenelHataYakalayici'da)
 //   2) Tek kopya kontrolu (isi TekKopyaKoruyucu'da)
-//   3) Siniflari birbirine baglamak: DI container SADECE burada kurulur (M6a, R2)
-//   4) Pencereyi acmak, kapanista rekoru kaydettirmek, acilis/kapanisi loglamak (K52, K63)
+//   3) Siniflari birbirine baglamak: DI container SADECE burada kurulur
+//   4) Pencereyi acmak, kapanista rekoru kaydettirmek, acilis/kapanisi loglamak
 //  Diger hicbir sinif container'i bilmez; hepsi ihtiyaclarini constructor'dan alir.
 // ================================================================================
 internal static class Program
@@ -36,14 +36,14 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        // 1) Genel hata yakalayici: HER SEYDEN ONCE (R6). DI'dan once gerektigi icin burada olusturulur.
+        // 1) Genel hata yakalayici: HER SEYDEN ONCE. DI'dan once gerektigi icin burada olusturulur.
         var genelHataYakalayici = new GenelHataYakalayici();
         genelHataYakalayici.Kur();
 
         // 2) WinForms'un standart ayarlari (yuksek DPI, gorsel stiller).
         ApplicationConfiguration.Initialize();
 
-        // 3) Tek kopya (K17, M25b).
+        // 3) Tek kopya.
         using var tekKopya = new TekKopyaKoruyucu(TekKopyaKilidi);
         if (!tekKopya.IlkKopyaMi)
         {
@@ -51,14 +51,14 @@ internal static class Program
             return;
         }
 
-        // 4) Siniflari bagla. Hata olursa oyun acilamaz (M24 #9).
+        // 4) Siniflari bagla. Hata olursa oyun acilamaz.
         ServiceProvider servisler;
         try
         {
-            servisler = ServisleriKur();
+            servisler = ServisleriKur(UygulamaYollari.VarsayilanKokKlasor());
             genelHataYakalayici.BildiriciyiAta(servisler.GetRequiredService<IHataBildirici>());
         }
-        catch (Exception hata)
+        catch (Exception hata) when (!DerlemeModu.HataAyiklamaMi)   // Debug'da debugger dursun
         {
             BaslangicHatasiniBildir(hata);
             return;
@@ -70,70 +70,71 @@ internal static class Program
             IGunlukcu gunlukcu = servisler.GetRequiredService<IGunlukcu>();
             try
             {
-                gunlukcu.Bilgi($"AliBird {Application.ProductVersion} açıldı.");   // K63
+                gunlukcu.Bilgi($"AliBird {Application.ProductVersion} açıldı.");
 
                 AnaForm form = servisler.GetRequiredService<AnaForm>();
                 OyunYoneticisi yonetici = servisler.GetRequiredService<OyunYoneticisi>();
-                PencereOlaylariniBagla(form, yonetici, servisler.GetRequiredService<IHataBildirici>());
+                PencereOlaylariniBagla(form, yonetici);
 
                 // Pencere kapanana kadar burada kalir.
                 Application.Run(form);
             }
-            catch (Exception hata)
+            catch (Exception hata) when (!DerlemeModu.HataAyiklamaMi)
             {
                 BaslangicHatasiniBildir(hata);
             }
             finally
             {
-                gunlukcu.Bilgi("AliBird kapandı.");   // K63 (logger servislerle birlikte en son kapanir)
+                gunlukcu.Bilgi("AliBird kapandı.");   // logger servislerle birlikte en son kapanir
             }
         }
     }
 
-    // ================= DI KURULUMU (N6: hepsi Singleton) =================
-    private static ServiceProvider ServisleriKur()
+    // ================= DI KURULUMU (hepsi Singleton) =================
+    // internal: smoke testleri ayni kayitlarla container'i kurabilsin (InternalsVisibleTo).
+    // kokKlasor: veri ve log klasoru; testte gecici bir klasor verilir.
+    internal static ServiceProvider ServisleriKur(string kokKlasor)
     {
         var servisler = new ServiceCollection();
 
         // ---- Core: oyun ----
-        servisler.AddSingleton(new OyunAyarlari());                                // D1b
-        servisler.AddSingleton<ICarpismaDenetcisi, CarpismaDenetcisi>();          // durum tutmaz (CK8, K65)
-        servisler.AddSingleton<IEngelUretici, EngelUretici>();                     // K65
-        servisler.AddSingleton<IOyunMotoruFabrikasi, OyunMotoruFabrikasi>();       // her oyunda yeni motor (K19, K60)
+        servisler.AddSingleton(new OyunAyarlari());
+        servisler.AddSingleton<ICarpismaDenetcisi, CarpismaDenetcisi>();          // durum tutmaz
+        servisler.AddSingleton<IEngelUretici, EngelUretici>();
+        servisler.AddSingleton<IOyunMotoruFabrikasi, OyunMotoruFabrikasi>();       // her oyunda yeni motor
 
-        // ---- Core: servisler (K61, Adim 8c) ----
+        // ---- Core: servisler ----
         servisler.AddSingleton<IRekorYoneticisi, RekorYoneticisi>();
         servisler.AddSingleton<ISesYoneticisi, SesYoneticisi>();
-        servisler.AddSingleton<IKareHataSayaci, KareHataSayaci>();
-        servisler.AddSingleton<IKareSuresiOlcer, KareSuresiOlcer>();               // Adim 9, CK53
-        servisler.AddSingleton<IKareCarpaniHesaplayici, KareCarpaniHesaplayici>(); // K68 delta time
+        servisler.AddSingleton<IKareSuresiOlcer, KareSuresiOlcer>();
+        servisler.AddSingleton<IKareCarpaniHesaplayici, KareCarpaniHesaplayici>(); // delta time
         servisler.AddSingleton<OyunYoneticisi>();                                  // presenter
 
         // ---- Infrastructure ----
-        servisler.AddSingleton<IUygulamaYollari>(_ => new UygulamaYollari(UygulamaYollari.VarsayilanKokKlasor()));
-        servisler.AddSingleton<IGunlukcu, SerilogGunlukcu>();                      // K15
-        servisler.AddSingleton<IHataBildirici, HataBildirici>();                   // K14
-        servisler.AddSingleton<IBozukVeritabaniKurtarici, BozukVeritabaniKurtarici>();   // K61
-        servisler.AddSingleton<IPuanDeposu, SqlitePuanDeposu>();                   // K10
-        servisler.AddSingleton<ISesUreteci, SesUreteci>();                         // K13
-        servisler.AddSingleton<ISesSaglayiciUretici, DiziSesSaglayiciUretici>();  // K65
+        servisler.AddSingleton<IUygulamaYollari>(_ => new UygulamaYollari(kokKlasor));
+        servisler.AddSingleton<IGunlukcu, SerilogGunlukcu>();
+        servisler.AddSingleton<IHataBildirici, HataBildirici>();
+        servisler.AddSingleton<IBozukVeritabaniKurtarici, BozukVeritabaniKurtarici>();
+        servisler.AddSingleton<IPuanDeposu, SqlitePuanDeposu>();
+        servisler.AddSingleton<ISesUreteci, SesUreteci>();
+        servisler.AddSingleton<ISesSaglayiciUretici, DiziSesSaglayiciUretici>();
         servisler.AddSingleton<ISesCalar, NAudioSesCalar>();
         servisler.AddSingleton<ISaat, SistemSaati>();
-        servisler.AddSingleton<IKronometre, SistemKronometresi>();                 // CK53: monoton sayac
+        servisler.AddSingleton<IKronometre, SistemKronometresi>();                 // monoton sayac
         servisler.AddSingleton<IRastgele, SistemRastgele>();
 
         // ---- WinForms ----
-        servisler.AddSingleton(Tema.Gece());                                       // G1b
-        servisler.AddSingleton<IOlcekHesaplayici, OlcekHesaplayici>();            // K65
+        servisler.AddSingleton(Tema.Gece());
+        servisler.AddSingleton<IOlcekHesaplayici, OlcekHesaplayici>();
         servisler.AddSingleton<CizimKaynaklari>();                                 // GDI+ kaynak paketi
         servisler.AddSingleton<IYaziCizici, YaziCizici>();
-        servisler.AddSingleton<IKusCizici, KusCizici>();                           // CK55
-        // Cizim katmanlari: KAYIT SIRASI = CIZIM SIRASI (arkadan one). Yeni katman = yeni satir (O).
+        servisler.AddSingleton<IKusCizici, KusCizici>();
+        // Cizim katmanlari: KAYIT SIRASI = CIZIM SIRASI (arkadan one). Yeni katman = yeni satir.
         servisler.AddSingleton<IKatmanCizici, SahneCizici>();
         servisler.AddSingleton<IKatmanCizici, BilgiCizici>();
         servisler.AddSingleton<IKatmanCizici, DurumKatmaniCizici>();
         servisler.AddSingleton<IOyunCizici, OyunCizici>();
-        servisler.AddSingleton<IZamanlayici, FormsZamanlayici>();                  // G8
+        servisler.AddSingleton<IZamanlayici, FormsZamanlayici>();
         servisler.AddSingleton<IKullaniciBildirici, MesajKutusuBildirici>();
         servisler.AddSingleton<AnaForm>();
         // Presenter IOyunGorunumu ister; ona AYNI AnaForm ornegi verilir.
@@ -148,22 +149,16 @@ internal static class Program
     }
 
     // ================= PENCERE OLAYLARI =================
-    private static void PencereOlaylariniBagla(AnaForm form, OyunYoneticisi yonetici, IHataBildirici hataBildirici)
+    private static void PencereOlaylariniBagla(AnaForm form, OyunYoneticisi yonetici)
     {
         // Pencere ekranda gorununce oyunu baslat (rekoru oku, zamanlayiciyi calistir).
         form.Shown += async (_, _) =>
         {
-            try
-            {
-                await yonetici.BaslatAsync();
-            }
-            catch (Exception hata)
-            {
-                hataBildirici.Bildir(hata, Gorunurluk.EkranVeGunluk, "Oyun başlatılamadı.");
-            }
+            // Beklenen hatalari (rekor dosyasi) RekorYoneticisi yakalar; buraya sadece bug gelir.
+            await yonetici.BaslatAsync();
         };
 
-        // K52 b: kapanirken ilk istegi iptal et, rekor kaydini bekle (en fazla 2 sn, CK6), sonra kapat (CK39).
+        // kapanirken ilk istegi iptal et, rekor kaydini bekle (en fazla 2 sn), sonra kapat.
         bool kapanisaHazir = false;
         form.FormClosing += async (_, e) =>
         {
@@ -173,21 +168,14 @@ internal static class Program
             }
 
             e.Cancel = true;
-            try
-            {
-                await yonetici.KapatAsync();
-            }
-            catch (Exception hata)
-            {
-                hataBildirici.Bildir(hata, Gorunurluk.SadeceGunluk, string.Empty);
-            }
+            await yonetici.KapatAsync();
 
             kapanisaHazir = true;
             form.Close();
         };
     }
 
-    // M24 #9: oyun hic acilamadi. Kullaniciya soyle ve mumkunse loga yaz.
+    // oyun hic acilamadi. Kullaniciya soyle ve mumkunse loga yaz.
     private static void BaslangicHatasiniBildir(Exception hata)
     {
         try
@@ -197,7 +185,7 @@ internal static class Program
         }
         catch
         {
-            // R6
+            // bilerek bos: zaten kapanis yolundayiz, gosterilecek baska yer yok.
         }
 
         try
@@ -208,7 +196,7 @@ internal static class Program
         }
         catch
         {
-            // R6
+            // bilerek bos: zaten kapanis yolundayiz, gosterilecek baska yer yok.
         }
     }
 }

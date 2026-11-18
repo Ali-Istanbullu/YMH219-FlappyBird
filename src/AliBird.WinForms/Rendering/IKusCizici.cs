@@ -1,6 +1,6 @@
 namespace AliBird.WinForms.Rendering;
 
-// Kusu verilen alana cizen sozlesme (Adim 10, CK55).
+// Kusu verilen alana cizen sozlesme.
 // Hem oyun (SahneCizici) hem ikon ureticisi (AliBird.IconGenerator) AYNI kusu cizer.
 public interface IKusCizici
 {

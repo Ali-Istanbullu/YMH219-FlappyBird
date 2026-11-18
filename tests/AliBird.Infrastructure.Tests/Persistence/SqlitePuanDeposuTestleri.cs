@@ -1,3 +1,4 @@
+using AliBird.Core.Errors;
 using AliBird.Core.Models;
 using AliBird.Infrastructure.FileSystem;
 using AliBird.Infrastructure.Persistence;
@@ -5,9 +6,8 @@ using AliBird.Infrastructure.Tests.Fakes;
 
 namespace AliBird.Infrastructure.Tests.Persistence;
 
-// Gercek bir SQLite dosyasi ile (gecici klasorde) rekor okuma/yazma ve hata kurallarini dogrular
-// (K10, K16, K63, M24 #3 #4, CK22, CK23, CK25).
-// Adim 8c: depoya GERCEK BozukVeritabaniKurtarici verilir; log ve hata bildirimi sahtedir.
+// Gercek bir SQLite dosyasi ile (gecici klasorde) rekor okuma/yazma ve hata kurallarini dogrular.
+// depoya GERCEK BozukVeritabaniKurtarici verilir; log ve hata bildirimi sahtedir.
 [TestClass]
 public sealed class SqlitePuanDeposuTestleri
 {
@@ -34,9 +34,9 @@ public sealed class SqlitePuanDeposuTestleri
     [TestMethod]
     public async Task IlkAcilis_RekorYok_NullDoner()
     {
-        Assert.IsNull(await _depo.RekoruOkuAsync());   // D3a
+        Assert.IsNull(await _depo.RekoruOkuAsync());
         Assert.IsTrue(File.Exists(_yollar.VeritabaniDosyasi()));   // dosya olusturuldu
-        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));   // M24 #3, K63
+        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));
     }
 
     [TestMethod]
@@ -48,7 +48,7 @@ public sealed class SqlitePuanDeposuTestleri
         RekorKaydi? okunan = await _depo.RekoruOkuAsync();
 
         Assert.AreEqual(12, okunan!.Puan);
-        Assert.AreEqual(tarih, okunan.Tarih);   // CK25: an kaybolmadi
+        Assert.AreEqual(tarih, okunan.Tarih);   // an kaybolmadi
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public sealed class SqlitePuanDeposuTestleri
         await _depo.RekoruKaydetAsync(new RekorKaydi(5, DateTime.Now));
         await _depo.RekoruKaydetAsync(new RekorKaydi(9, DateTime.Now));
 
-        Assert.AreEqual(9, (await _depo.RekoruOkuAsync())!.Puan);   // K10: tek rekor
+        Assert.AreEqual(9, (await _depo.RekoruOkuAsync())!.Puan);   // tek rekor
     }
 
     [TestMethod]
@@ -65,14 +65,14 @@ public sealed class SqlitePuanDeposuTestleri
     {
         await _depo.RekoruKaydetAsync(new RekorKaydi(5, DateTime.Now));
 
-        // CK22: baglanti kapali oldugu icin dosya kilitli degil, silinebilir.
+        // baglanti kapali oldugu icin dosya kilitli degil, silinebilir.
         File.Delete(_yollar.VeritabaniDosyasi());
 
-        Assert.IsNull(await _depo.RekoruOkuAsync());                 // K16: hata yok
+        Assert.IsNull(await _depo.RekoruOkuAsync());                 // hata yok
         await _depo.RekoruKaydetAsync(new RekorKaydi(3, DateTime.Now));
         Assert.AreEqual(3, (await _depo.RekoruOkuAsync())!.Puan);
         Assert.IsEmpty(_hata.Bildirimler);                           // kullaniciya bir sey gosterilmedi
-        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));   // ama loga yazildi (M24 #3)
+        Assert.IsTrue(_gunlukcu.Kayitlar.Any(k => k.Contains("yeniden oluşturuldu")));   // ama loga yazildi
     }
 
     [TestMethod]
@@ -82,7 +82,7 @@ public sealed class SqlitePuanDeposuTestleri
 
         Directory.Delete(_yollar.VeriKlasoru(), recursive: true);
 
-        Assert.IsNull(await _depo.RekoruOkuAsync());   // K16
+        Assert.IsNull(await _depo.RekoruOkuAsync());
     }
 
     [TestMethod]
@@ -94,9 +94,9 @@ public sealed class SqlitePuanDeposuTestleri
 
         RekorKaydi? okunan = await _depo.RekoruOkuAsync();
 
-        Assert.IsNull(okunan);                                   // M24 #4: rekor sifirlandi
+        Assert.IsNull(okunan);                                   // rekor sifirlandi
         Assert.AreEqual(1, _hata.EkranaGidenSayisi);             // kullanici bilgilendirildi
-        Assert.HasCount(1, Directory.GetFiles(_yollar.VeriKlasoru(), "alibird.corrupt-*.db"));   // CK23: silinmedi
+        Assert.HasCount(1, Directory.GetFiles(_yollar.VeriKlasoru(), "alibird.corrupt-*.db"));   // silinmedi
 
         await _depo.RekoruKaydetAsync(new RekorKaydi(4, DateTime.Now));
         Assert.AreEqual(4, (await _depo.RekoruOkuAsync())!.Puan);   // yeni dosya calisiyor
@@ -111,5 +111,18 @@ public sealed class SqlitePuanDeposuTestleri
 
         Assert.AreEqual(7, (await _depo.RekoruOkuAsync())!.Puan);
         Assert.AreEqual(1, _hata.EkranaGidenSayisi);
+    }
+
+    [TestMethod]
+    public async Task KilitliDosya_PuanDeposuHatasinaSarilir()
+    {
+        // Baska bir program dosyayi kilitlediyse: beklenen hata, Core'un tanidigi tipe sarilir.
+        string dosya = _yollar.VeritabaniDosyasi();
+        await File.WriteAllBytesAsync(dosya, []);
+        using (new FileStream(dosya, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+        {
+            await Assert.ThrowsExactlyAsync<PuanDeposuHatasi>(() => _depo.RekoruOkuAsync());
+        }
+        Assert.IsEmpty(_hata.Bildirimler);   // bozuk sayilmadi, dosya kenara alinmadi
     }
 }
